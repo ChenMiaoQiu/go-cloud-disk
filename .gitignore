@@ -1,1 +1,5 @@
-*.env
+.vscode/
+.env
+go.sum
+__debug*
+*.exe
