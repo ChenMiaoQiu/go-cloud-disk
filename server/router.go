@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/api"
+	"github.com/ChenMiaoQiu/go-cloud-disk/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +15,12 @@ func NewRouter() *gin.Engine {
 
 		v1.POST("user/login", api.UserLogin)
 		v1.POST("user/register", api.UserRegiser)
+
+		auth := v1.Group("")
+		auth.Use(middleware.JWTAuth())
+		{
+			auth.GET("user/:id", api.UserInfo)
+		}
 	}
 
 	return r

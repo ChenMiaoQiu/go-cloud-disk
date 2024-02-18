@@ -12,6 +12,7 @@ type UserRegisterService struct {
 	PasswordConfirm string `form:"password_confirm" json:"password_confirm" binding:"required,min=8,max=40"`
 }
 
+// vaild check if regiser info correct
 func (service *UserRegisterService) vaild() *serializer.Response {
 	// check password
 	if service.PasswordConfirm != service.Password {
@@ -21,6 +22,7 @@ func (service *UserRegisterService) vaild() *serializer.Response {
 		}
 	}
 
+	// check nickname
 	count := int64(0)
 	model.DB.Model(&model.User{}).Where("nick_name = ?", service.NickName).Count(&count)
 	if count > 0 {
@@ -30,6 +32,7 @@ func (service *UserRegisterService) vaild() *serializer.Response {
 		}
 	}
 
+	// check username
 	count = 0
 	model.DB.Model(&model.User{}).Where("user_name = ?", service.UserName).Count(&count)
 	if count > 0 {
@@ -42,6 +45,8 @@ func (service *UserRegisterService) vaild() *serializer.Response {
 	return nil
 }
 
+// Register check if register info correct. if it correct,
+// register the user to database. Otherwise, return a error message
 func (service *UserRegisterService) Register() serializer.Response {
 	user := model.User{
 		NickName: service.NickName,

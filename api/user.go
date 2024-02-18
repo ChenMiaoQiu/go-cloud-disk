@@ -26,3 +26,14 @@ func UserRegiser(c *gin.Context) {
 		c.JSON(200, ErrorResponse(err))
 	}
 }
+
+// UserInfo get user info
+func UserInfo(c *gin.Context) {
+	var service service.UserInfoService
+	if err := c.ShouldBind(&service); err == nil {
+		res := service.GetUserInfo(c.Param("id"))
+		c.JSON(200, res)
+	} else {
+		c.JSON(200, ErrorResponse(err))
+	}
+}

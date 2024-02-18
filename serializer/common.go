@@ -40,10 +40,13 @@ func Success(data interface{}) Response {
 }
 
 // NotLogin return an unlogin response
-func NotLogin() Response {
+func NotLogin(msg string) Response {
+	if msg == "" {
+		msg = "Not Login"
+	}
 	return Response{
 		Code: CodeNotLogin,
-		Msg:  "Not Login",
+		Msg:  msg,
 	}
 }
 
