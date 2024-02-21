@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strconv"
+
 	"github.com/ChenMiaoQiu/go-cloud-disk/service"
 	"github.com/gin-gonic/gin"
 )
@@ -32,6 +34,19 @@ func UserInfo(c *gin.Context) {
 	var service service.UserInfoService
 	if err := c.ShouldBind(&service); err == nil {
 		res := service.GetUserInfo(c.Param("id"))
+		c.JSON(200, res)
+	} else {
+		c.JSON(200, ErrorResponse(err))
+	}
+}
+
+// UserMyInfo get user info form jwt info
+func UserMyInfo(c *gin.Context) {
+	var service service.UserInfoService
+
+	if err := c.ShouldBind(&service); err == nil {
+		userIdString := strconv.Itoa(int(c.MustGet("UserId").(uint)))
+		res := service.GetUserInfo(userIdString)
 		c.JSON(200, res)
 	} else {
 		c.JSON(200, ErrorResponse(err))

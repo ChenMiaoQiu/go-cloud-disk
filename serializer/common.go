@@ -18,8 +18,8 @@ type Response struct {
 const (
 	// CodeNotLogin success code 200
 	CodeSuccess = http.StatusOK
-	// CodeNotLogin Not Login Code 401
-	CodeNotLogin = http.StatusUnauthorized
+	// CodeNotLogin Not Login Code 1250
+	CodeNotLogin = 1250
 	// CodeNotRightErr Unauthorized Code 401
 	CodeNotRightError = http.StatusUnauthorized
 	// CodeDBError database error Code 500
@@ -30,7 +30,7 @@ const (
 	CodeParamsError = 50001
 )
 
-// Success
+// Success return a success response
 func Success(data interface{}) Response {
 	return Response{
 		Code: CodeSuccess,

@@ -22,6 +22,7 @@ func NewRouter() *gin.Engine {
 		auth.Use(middleware.JWTAuth())
 		{
 			auth.GET("user/:id", api.UserInfo)
+			auth.GET("user", api.UserMyInfo)
 		}
 	}
 
