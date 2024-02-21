@@ -10,7 +10,7 @@ import (
 )
 
 type MyClaims struct {
-	UserId   uint   `json:"user_id"`
+	UserId   string `json:"user_id"`
 	UserName string `json:"user_name"`
 	Status   string `json:"status"`
 	jwt.RegisteredClaims
@@ -20,7 +20,7 @@ type MyClaims struct {
 func GenToken(issuer string, expireHour int, user *model.User) (string, error) {
 	mySigningKey := []byte(os.Getenv("JWT_KEY"))
 	claims := MyClaims{
-		UserId:   user.ID,
+		UserId:   user.Uuid,
 		UserName: user.UserName,
 		Status:   user.Status,
 		RegisteredClaims: jwt.RegisteredClaims{

@@ -4,7 +4,7 @@ import "github.com/ChenMiaoQiu/go-cloud-disk/model"
 
 // User serializer
 type User struct {
-	ID       uint   `json:"id"`
+	ID       string `json:"id"`
 	UserName string `json:"user_name"`
 	NickName string `json:"nick_name"`
 	Status   string `json:"status"`
@@ -15,12 +15,11 @@ type User struct {
 // BuildUser return a user serializer
 func BuildUser(user model.User) User {
 	return User{
-		ID:       user.ID,
+		ID:       user.Uuid,
 		UserName: user.UserName,
 		NickName: user.NickName,
 		Status:   user.Status,
 		Avatar:   user.Avatar,
-		CreateAt: user.CreatedAt.Unix(),
 	}
 }
 

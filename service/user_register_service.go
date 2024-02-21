@@ -65,7 +65,7 @@ func (service *UserRegisterService) Register() serializer.Response {
 	}
 
 	// create user
-	if err := model.DB.Create(&user).Error; err != nil {
+	if err := user.CreateUser(); err != nil {
 		return serializer.ParamsErr("create user error", err)
 	}
 
