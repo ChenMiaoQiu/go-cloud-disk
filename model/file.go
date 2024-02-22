@@ -7,7 +7,7 @@ import (
 
 type File struct {
 	Uuid           string `gorm:"primarykey"`
-	Owner          string // file owner
+	Owner          string // file owner if File deleted the owner is null,
 	FileName       string // real filename
 	FilePostfix    string
 	FileUuid       string // filename in cloud
