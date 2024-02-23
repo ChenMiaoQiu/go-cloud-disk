@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -15,13 +16,18 @@ type Response struct {
 	Error string      `json:"error,omitempty"`
 }
 
+// Response Url link
+type ResponseUrl struct {
+	Url string `json:"url"`
+}
+
 const (
 	// CodeNotLogin success code 200
 	CodeSuccess = http.StatusOK
 	// CodeNotLogin Not Login Code 1250
 	CodeNotLogin = 1250
 	// CodeNotRightErr Unauthorized Code 401
-	CodeNotRightError = http.StatusUnauthorized
+	CodeNotAuthError = http.StatusUnauthorized
 	// CodeDBError database error Code 500
 	CodeDBError = http.StatusInternalServerError
 	// CodeError common error code 404
@@ -36,6 +42,18 @@ func Success(data interface{}) Response {
 		Code: CodeSuccess,
 		Msg:  "success",
 		Data: data,
+	}
+}
+
+// NotAuthErr use msg build a not auth err response, if msg is null
+// msg info is "not auth"
+func NotAuthErr(msg string) Response {
+	if msg == "" {
+		msg = "not auth"
+	}
+	return Response{
+		Code: CodeNotAuthError,
+		Msg:  msg,
 	}
 }
 
@@ -76,4 +94,13 @@ func ParamsErr(msg string, err error) Response {
 		msg = "parmars error"
 	}
 	return Err(CodeParamsError, msg, err)
+}
+
+// ErrorResponse return err msg
+func ErrorResponse(err error) Response {
+	if _, ok := err.(*json.UnmarshalTypeError); ok {
+		return ParamsErr("JSON类型不匹配", err)
+	}
+
+	return ParamsErr("参数错误", err)
 }

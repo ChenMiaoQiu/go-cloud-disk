@@ -8,13 +8,14 @@ import (
 )
 
 type User struct {
-	Uuid            string `gorm:"primarykey"`
-	UserName        string
-	PasswordDigest  string
-	NickName        string
-	Status          string
-	Avatar          string `gorm:"size:1000"`
-	UserFileStoreID string
+	Uuid                 string `gorm:"primarykey"`
+	UserName             string
+	PasswordDigest       string
+	NickName             string
+	Status               string
+	Avatar               string `gorm:"size:1000"`
+	UserFileStoreID      string
+	UserMainFileFolderID string
 }
 
 const (
@@ -53,10 +54,13 @@ func (user *User) CreateUser() error {
 	if err != nil {
 		return fmt.Errorf("create file Store error %v", err)
 	}
-	if err = CreateBaseFileFolder(fileStoreId); err != nil {
+	mainFileFolderId, err := CreateBaseFileFolder(user.Uuid, fileStoreId)
+	if err != nil {
 		return fmt.Errorf("create base fileFolder error %v", err)
 	}
+
 	user.UserFileStoreID = fileStoreId
+	user.UserMainFileFolderID = mainFileFolderId
 	if err := DB.Create(user).Error; err != nil {
 		return fmt.Errorf("create User error %v", err)
 	}

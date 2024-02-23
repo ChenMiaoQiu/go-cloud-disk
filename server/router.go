@@ -23,6 +23,12 @@ func NewRouter() *gin.Engine {
 		{
 			auth.GET("user/:id", api.UserInfo)
 			auth.GET("user", api.UserMyInfo)
+
+			auth.POST("file", api.CreateFile)
+			auth.GET("files", api.GetFilefolderAllFile)
+
+			auth.GET("downloadpath", api.GetDownloadURL)
+			auth.GET("uploadpath", api.GetUploadURL)
 		}
 	}
 

@@ -4,20 +4,16 @@ import "github.com/ChenMiaoQiu/go-cloud-disk/model"
 
 // file serializer
 type File struct {
-	Uuid        string `json:"id"`
-	Owner       string `json:"owner"`
-	FileName    string `json:"filename"`
-	FilePostfix string `json:"filetype"`
-	Size        int64  `json:"size"`
+	Uuid     string `json:"file_id"`
+	FileName string `json:"filename"`
+	Size     uint   `json:"size"`
 }
 
 func BuildFile(file model.File) File {
 	return File{
-		Uuid:        file.Uuid,
-		Owner:       file.Owner,
-		FileName:    file.FileName,
-		FilePostfix: file.FilePostfix,
-		Size:        file.Size,
+		Uuid:     file.Uuid,
+		FileName: file.FileName,
+		Size:     file.Size,
 	}
 }
 

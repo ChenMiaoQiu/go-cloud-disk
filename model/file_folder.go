@@ -10,22 +10,28 @@ type FileFolder struct {
 	FileFolderName string
 	ParentFolderID string
 	FileStoreID    string
+	OwnerID        string
 }
 
 // BeforeCreate create uuid before insert database
 func (fileFolder *FileFolder) BeforeCreate(tx *gorm.DB) (err error) {
-	fileFolder.Uuid = uuid.New().String()
+	if fileFolder.Uuid != "" {
+		fileFolder.Uuid = uuid.New().String()
+	}
 	return
 }
 
-func CreateBaseFileFolder(fileStoreId string) error {
+// CreateBaseFileFolder create a user fileFolder with fileStoreId and ownerId,
+// and return it uuid or err
+func CreateBaseFileFolder(ownerId string, fileStoreId string) (string, error) {
 	fileStore := FileFolder{
 		FileFolderName: "main",
 		ParentFolderID: "root",
 		FileStoreID:    fileStoreId,
+		OwnerID:        ownerId,
 	}
 	if err := DB.Create(&fileStore).Error; err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return fileStore.Uuid, nil
 }

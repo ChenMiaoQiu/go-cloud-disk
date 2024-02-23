@@ -14,10 +14,13 @@ type FileStore struct {
 
 // BeforeCreate create uuid before insert database
 func (fileStore *FileStore) BeforeCreate(tx *gorm.DB) (err error) {
-	fileStore.Uuid = uuid.New().String()
+	if fileStore.Uuid != "" {
+		fileStore.Uuid = uuid.NewString()
+	}
 	return
 }
 
+// CreateFileStore create new fileStore by userId, and return it uuid or err
 func CreateFileStore(userId string) (string, error) {
 	fileStore := FileStore{
 		OwnerID:     userId,

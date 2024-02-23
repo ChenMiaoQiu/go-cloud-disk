@@ -185,10 +185,14 @@ func (cloud *TencentCloudDisk) IsObjectExist(userId string, filePath string, fil
 func fastBuildKey(userId string, filePath string, file string) string {
 	var key strings.Builder
 	key.Write([]byte("user/"))
-	key.Write([]byte(userId))
-	key.Write([]byte("/"))
-	key.Write([]byte(filePath))
-	key.Write([]byte("/"))
+	if userId != "" {
+		key.Write([]byte(userId))
+		key.Write([]byte("/"))
+	}
+	if filePath != "" {
+		key.Write([]byte(filePath))
+		key.Write([]byte("/"))
+	}
 	key.Write([]byte(file))
 	return key.String()
 }

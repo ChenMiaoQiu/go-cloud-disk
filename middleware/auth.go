@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// JWTAuth check jwt auth and save jwt info
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// token format Authorization: "Bearer [token]"
