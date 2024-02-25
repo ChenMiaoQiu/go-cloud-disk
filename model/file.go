@@ -13,7 +13,7 @@ type File struct {
 	FileUuid       string // filename in cloud
 	FilePath       string
 	ParentFolderId string
-	Size           uint // file size
+	Size           int64 // file size
 }
 
 // BeforeCreate create uuid before insert database

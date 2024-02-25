@@ -15,7 +15,7 @@ type FileFolder struct {
 
 // BeforeCreate create uuid before insert database
 func (fileFolder *FileFolder) BeforeCreate(tx *gorm.DB) (err error) {
-	if fileFolder.Uuid != "" {
+	if fileFolder.Uuid == "" {
 		fileFolder.Uuid = uuid.New().String()
 	}
 	return

@@ -8,13 +8,13 @@ import (
 type FileStore struct {
 	Uuid        string `gorm:"primarykey"`
 	OwnerID     string
-	CurrentSize uint
-	MaxSize     uint
+	CurrentSize int64
+	MaxSize     int64
 }
 
 // BeforeCreate create uuid before insert database
 func (fileStore *FileStore) BeforeCreate(tx *gorm.DB) (err error) {
-	if fileStore.Uuid != "" {
+	if fileStore.Uuid == "" {
 		fileStore.Uuid = uuid.NewString()
 	}
 	return

@@ -12,6 +12,8 @@ type CloudDisk interface {
 	DeleteObjectFilefolder(userId string, filePath string) error
 	// IsObjectExist check file is exist
 	IsObjectExist(userId string, filePath string, fileName string) (bool, error)
+	// UploadSimpleFile upload file smaller than 1GB to the cloud
+	UploadSimpleFile(localFilePath string, userId string, md5 string, fileSize int64) error
 }
 
 var _ CloudDisk = (*TencentCloudDisk)(nil)

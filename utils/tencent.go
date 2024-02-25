@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -16,6 +17,18 @@ type TencentCloudDisk struct {
 	bucketname string
 	secretId   string
 	secretKey  string
+}
+
+func (cloud *TencentCloudDisk) getDefaultClient() *cos.Client {
+	u, _ := url.Parse(cloud.bucketname)
+	b := &cos.BaseURL{BucketURL: u}
+	c := cos.NewClient(b, &http.Client{
+		Transport: &cos.AuthorizationTransport{
+			SecretID:  os.Getenv("SECRET_ID"),
+			SecretKey: os.Getenv("SECRET_KEY"),
+		},
+	})
+	return c
 }
 
 // getUploadPresignedURLPresigned use name string to generate presigned url
@@ -51,14 +64,7 @@ func (cloud *TencentCloudDisk) GetUploadPresignedURL(userId string, filePath str
 // getObjectUrl use key to generate objecturl, user can user objectURL to
 // download file or view photo
 func (cloud *TencentCloudDisk) getObjectUrl(key string) (string, error) {
-	u, _ := url.Parse(cloud.bucketname)
-	b := &cos.BaseURL{BucketURL: u}
-	client := cos.NewClient(b, &http.Client{
-		Transport: &cos.AuthorizationTransport{
-			SecretID:  cloud.secretId,
-			SecretKey: cloud.secretKey,
-		},
-	})
+	client := cloud.getDefaultClient()
 	ourl := client.Object.GetObjectURL(key)
 	return ourl.String(), nil
 }
@@ -75,14 +81,7 @@ func (cloud *TencentCloudDisk) GetObjectURL(userId string, filePath string, file
 
 // deleteObject delte multi object in cloud
 func (cloud *TencentCloudDisk) deleteObject(keys []string) error {
-	u, _ := url.Parse(cloud.bucketname)
-	b := &cos.BaseURL{BucketURL: u}
-	client := cos.NewClient(b, &http.Client{
-		Transport: &cos.AuthorizationTransport{
-			SecretID:  cloud.secretId,
-			SecretKey: cloud.secretKey,
-		},
-	})
+	client := cloud.getDefaultClient()
 	obs := []cos.Object{}
 	for _, v := range keys {
 		obs = append(obs, cos.Object{Key: v})
@@ -110,14 +109,7 @@ func (cloud *TencentCloudDisk) DeleteObject(userId string, filePath string, item
 }
 
 func (cloud *TencentCloudDisk) deleteFilefold(dir string) error {
-	u, _ := url.Parse(cloud.bucketname)
-	b := &cos.BaseURL{BucketURL: u}
-	client := cos.NewClient(b, &http.Client{
-		Transport: &cos.AuthorizationTransport{
-			SecretID:  cloud.secretId,
-			SecretKey: cloud.secretKey,
-		},
-	})
+	client := cloud.getDefaultClient()
 	var marker string
 	opt := &cos.BucketGetOptions{
 		Prefix:  dir,
@@ -159,14 +151,7 @@ func (cloud *TencentCloudDisk) DeleteObjectFilefolder(userId string, filePath st
 }
 
 func (cloud *TencentCloudDisk) checkObjectIsExist(key string) (bool, error) {
-	u, _ := url.Parse(cloud.bucketname)
-	b := &cos.BaseURL{BucketURL: u}
-	client := cos.NewClient(b, &http.Client{
-		Transport: &cos.AuthorizationTransport{
-			SecretID:  cloud.secretId,
-			SecretKey: cloud.secretKey,
-		},
-	})
+	client := cloud.getDefaultClient()
 	ok, err := client.Object.IsExist(context.Background(), key)
 	if err != nil {
 		return false, err
@@ -179,6 +164,45 @@ func (cloud *TencentCloudDisk) IsObjectExist(userId string, filePath string, fil
 	key := fastBuildKey(userId, filePath, fileName)
 	ok, err := cloud.checkObjectIsExist(key)
 	return ok, err
+}
+
+// uploadSimpleFile use PutFromFile upload local file to the cloud
+func (cloud *TencentCloudDisk) uploadSimpleFile(localFilePath string, key string) error {
+	client := cloud.getDefaultClient()
+	opt := &cos.ObjectPutOptions{
+		ObjectPutHeaderOptions: &cos.ObjectPutHeaderOptions{
+			ContentType: "text/html",
+		},
+	}
+	_, err := client.Object.PutFromFile(context.Background(), key, localFilePath, opt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UploadSimpleFile upload file smaller than 1GB to the cloud
+func (cloud *TencentCloudDisk) UploadSimpleFile(localFilePath string, userId string, md5 string, fileSize int64) error {
+	if fileSize/1024/1024/1024 > 1 {
+		return fmt.Errorf("file to big, please use uploadfile")
+	}
+
+	// check if the file exists on cloud
+	extend := path.Ext(localFilePath)
+	ok, err := cloud.IsObjectExist(userId, "", md5+extend)
+	if err != nil {
+		return err
+	}
+
+	key := fastBuildKey(userId, "", md5+extend)
+	// if not on the cloud, upload file
+	if !ok {
+		if err = cloud.uploadSimpleFile(localFilePath, key); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // fastBuildKey use userId, filePath, filename to generate key by Builder

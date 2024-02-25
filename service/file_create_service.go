@@ -11,7 +11,7 @@ type FileCreateService struct {
 	FilePostfix    string `json:"file_postfix" form:"file_postfix" binding:"required"`
 	FileUuid       string `json:"file_uuid" form:"file_uuid" binding:"required"`
 	ParentFolderId string `json:"folder" form:"folder" binding:"required"`
-	Size           uint   `json:"size" form:"size" binding:"required"`
+	Size           int64  `json:"size" form:"size" binding:"required"`
 }
 
 func (service *FileCreateService) CreateFile(owner string) serializer.Response {

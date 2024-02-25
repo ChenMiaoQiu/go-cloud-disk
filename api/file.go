@@ -53,6 +53,18 @@ func GetFilefolderAllFile(c *gin.Context) {
 		return
 	}
 
-	res := service.GetAllFile()
+	jwtUser := c.MustGet("UserId").(string)
+	res := service.GetAllFile(jwtUser)
+	c.JSON(200, res)
+}
+
+func UploadFile(c *gin.Context) {
+	var service service.FileUploadService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	res := service.UploadFile(c)
 	c.JSON(200, res)
 }

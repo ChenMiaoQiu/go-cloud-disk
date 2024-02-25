@@ -5,11 +5,10 @@ import "github.com/ChenMiaoQiu/go-cloud-disk/model"
 // User serializer
 type User struct {
 	ID       string `json:"id"`
-	UserName string `json:"user_name"`
-	NickName string `json:"nick_name"`
+	UserName string `json:"username"`
+	NickName string `json:"nickname"`
 	Status   string `json:"status"`
 	Avatar   string `json:"avatar"`
-	CreateAt int64  `json:"create_at"`
 }
 
 // BuildUser return a user serializer

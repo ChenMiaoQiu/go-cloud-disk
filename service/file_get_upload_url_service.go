@@ -7,7 +7,7 @@ import (
 )
 
 type GetUploadURLService struct {
-	FileType string `form:"filetype" json:"filetype" binding:"required,min=2"`
+	FileType string `form:"filetype" json:"filetype" binding:"required,min=1"`
 }
 
 type getUploadURLResponse struct {

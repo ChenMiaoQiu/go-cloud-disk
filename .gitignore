@@ -3,3 +3,7 @@
 go.sum
 __debug*
 *.exe
+.VScode*
+*.png
+*.jpg
+user/*

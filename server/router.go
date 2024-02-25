@@ -9,6 +9,7 @@ import (
 func NewRouter() *gin.Engine {
 	r := gin.Default()
 
+	r.MaxMultipartMemory = 8 << 20 // set upload speed
 	r.Use(middleware.Cors())
 
 	v1 := r.Group("/api/v1")
@@ -27,8 +28,7 @@ func NewRouter() *gin.Engine {
 			auth.POST("file", api.CreateFile)
 			auth.GET("files", api.GetFilefolderAllFile)
 
-			auth.GET("downloadpath", api.GetDownloadURL)
-			auth.GET("uploadpath", api.GetUploadURL)
+			auth.POST("upload", api.UploadFile)
 		}
 	}
 
