@@ -33,12 +33,8 @@ func (service *UserLoginService) Login(c *gin.Context) serializer.Response {
 	if err != nil {
 		return serializer.Err(serializer.CodeError, "token generate error", err)
 	}
-	return serializer.Response{
-		Code: serializer.CodeSuccess,
-		Msg:  "success",
-		Data: returnUser{
-			Token: token,
-			User:  serializer.BuildUser(user),
-		},
-	}
+	return serializer.Success(returnUser{
+		Token: token,
+		User:  serializer.BuildUser(user),
+	})
 }

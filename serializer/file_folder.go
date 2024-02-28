@@ -4,7 +4,7 @@ import "github.com/ChenMiaoQiu/go-cloud-disk/model"
 
 // file_store serializer
 type FileFolder struct {
-	Uuid           string `json:"id"`
+	Uuid           string `json:"filefolder_id"`
 	FileFolderName string `json:"name"`
 	Filetype       string `json:"filetype"`
 }

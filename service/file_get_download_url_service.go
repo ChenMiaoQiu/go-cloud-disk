@@ -18,7 +18,7 @@ type fileGetDownloadURLResponse struct {
 
 func (service *FileGetDownloadURLService) GetDownloadURL(userId string) serializer.Response {
 	var file model.File
-	if err := model.DB.Find(&file).Where("uuid = ?", service.FileId).Error; err != nil {
+	if err := model.DB.Where("uuid = ?", service.FileId).Find(&file).Error; err != nil {
 		return serializer.DBErr("can't find file", err)
 	}
 

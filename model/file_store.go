@@ -20,6 +20,12 @@ func (fileStore *FileStore) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
+// AddCurrentSize add size to currentsize
+func (fileStore *FileStore) AddCurrentSize(size int64) (err error) {
+	fileStore.CurrentSize += size
+	return nil
+}
+
 // CreateFileStore create new fileStore by userId, and return it uuid or err
 func CreateFileStore(userId string) (string, error) {
 	fileStore := FileStore{

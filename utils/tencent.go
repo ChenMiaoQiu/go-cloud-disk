@@ -63,7 +63,14 @@ func (cloud *TencentCloudDisk) GetUploadPresignedURL(userId string, filePath str
 
 // getObjectUrl use key to generate objecturl, user can user objectURL to
 // download file or view photo
-func (cloud *TencentCloudDisk) getObjectUrl(key string) (string, error) {
+func (cloud *TencentCloudDisk) getObjectUrl(key string) (str string, err error) {
+	var ok bool
+	if ok, err = cloud.checkObjectIsExist(key); err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", fmt.Errorf("this object don't exist on cloud")
+	}
 	client := cloud.getDefaultClient()
 	ourl := client.Object.GetObjectURL(key)
 	return ourl.String(), nil
@@ -156,7 +163,7 @@ func (cloud *TencentCloudDisk) checkObjectIsExist(key string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return ok, err
+	return ok, nil
 }
 
 // IsObjectExist check object is exist

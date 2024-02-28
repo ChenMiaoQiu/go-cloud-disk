@@ -45,19 +45,7 @@ func GetDownloadURL(c *gin.Context) {
 	c.JSON(200, res)
 }
 
-// GetFilefolderAllFile return a file from the filefolder
-func GetFilefolderAllFile(c *gin.Context) {
-	var service service.FileFolderGetAllFileService
-	if err := c.ShouldBind(&service); err != nil {
-		c.JSON(200, serializer.ErrorResponse(err))
-		return
-	}
-
-	jwtUser := c.MustGet("UserId").(string)
-	res := service.GetAllFile(jwtUser)
-	c.JSON(200, res)
-}
-
+// UploadFile upload file to cloud
 func UploadFile(c *gin.Context) {
 	var service service.FileUploadService
 	if err := c.ShouldBind(&service); err != nil {
@@ -66,5 +54,18 @@ func UploadFile(c *gin.Context) {
 	}
 
 	res := service.UploadFile(c)
+	c.JSON(200, res)
+}
+
+// DeleteFile delete file in database, don't delete file on cloud
+func DeleteFile(c *gin.Context) {
+	var service service.FileDeleteService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	userId := c.MustGet("UserId").(string)
+	res := service.FileDelete(userId)
 	c.JSON(200, res)
 }

@@ -11,14 +11,13 @@ type File struct {
 	FileName       string // real filename
 	FilePostfix    string
 	FileUuid       string // filename in cloud
-	FilePath       string
 	ParentFolderId string
 	Size           int64 // file size
 }
 
 // BeforeCreate create uuid before insert database
 func (file *File) BeforeCreate(tx *gorm.DB) (err error) {
-	if file.Uuid != "" {
+	if file.Uuid == "" {
 		file.Uuid = uuid.New().String()
 	}
 	return

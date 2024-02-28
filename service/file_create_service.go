@@ -41,7 +41,6 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 		FileName:       service.FileName,
 		FilePostfix:    service.FilePostfix,
 		FileUuid:       service.FileUuid,
-		FilePath:       owner,
 		ParentFolderId: service.ParentFolderId,
 		Size:           service.Size,
 	}

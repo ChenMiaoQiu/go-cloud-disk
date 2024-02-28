@@ -6,6 +6,7 @@ import "github.com/ChenMiaoQiu/go-cloud-disk/model"
 type File struct {
 	Uuid     string `json:"file_id"`
 	FileName string `json:"filename"`
+	FileType string `json:"filetype"`
 	Size     int64  `json:"size"`
 }
 
