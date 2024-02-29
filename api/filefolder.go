@@ -14,8 +14,9 @@ func GetFilefolderAllFile(c *gin.Context) {
 		return
 	}
 
+	fileFolderId := c.Param("filefolderid")
 	jwtUser := c.MustGet("UserId").(string)
-	res := service.GetAllFile(jwtUser)
+	res := service.GetAllFile(jwtUser, fileFolderId)
 	c.JSON(200, res)
 }
 
@@ -26,7 +27,21 @@ func GetFilefolderAllFilefolder(c *gin.Context) {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
 	}
+
+	fileFolderId := c.Param("filefolderid")
 	jwtUser := c.MustGet("UserId").(string)
-	res := service.GetAllFileFolder(jwtUser)
+	res := service.GetAllFileFolder(jwtUser, fileFolderId)
+	c.JSON(200, res)
+}
+
+func CreateFileFolder(c *gin.Context) {
+	var service service.FileFolderCreateService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	jwtUser := c.MustGet("UserId").(string)
+	res := service.CreateFileFolder(jwtUser)
 	c.JSON(200, res)
 }

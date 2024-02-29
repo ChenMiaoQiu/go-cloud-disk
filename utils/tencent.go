@@ -61,6 +61,25 @@ func (cloud *TencentCloudDisk) GetUploadPresignedURL(userId string, filePath str
 	return presignedURL, nil
 }
 
+func (cloud *TencentCloudDisk) getDownloadPresignedURL(key string) (string, error) {
+	client := cloud.getDefaultClient()
+	ctx := context.Background()
+	presignedURL, err := client.Object.GetPresignedURL(ctx, http.MethodGet, key, cloud.secretId, cloud.secretKey, time.Hour, nil)
+	if err != nil {
+		return "", fmt.Errorf("create download presined url err %v", err)
+	}
+	return presignedURL.String(), nil
+}
+
+func (cloud *TencentCloudDisk) GetDownloadPresignedURL(userId string, filePath string, fileName string) (string, error) {
+	key := fastBuildKey(userId, filePath, fileName)
+	presignedURL, err := cloud.getDownloadPresignedURL(key)
+	if err != nil {
+		return "", err
+	}
+	return presignedURL, nil
+}
+
 // getObjectUrl use key to generate objecturl, user can user objectURL to
 // download file or view photo
 func (cloud *TencentCloudDisk) getObjectUrl(key string) (str string, err error) {
@@ -178,7 +197,7 @@ func (cloud *TencentCloudDisk) uploadSimpleFile(localFilePath string, key string
 	client := cloud.getDefaultClient()
 	opt := &cos.ObjectPutOptions{
 		ObjectPutHeaderOptions: &cos.ObjectPutHeaderOptions{
-			ContentType: "text/html",
+			ContentDisposition: "attachment",
 		},
 	}
 	_, err := client.Object.PutFromFile(context.Background(), key, localFilePath, opt)

@@ -14,6 +14,7 @@ func BuildFile(file model.File) File {
 	return File{
 		Uuid:     file.Uuid,
 		FileName: file.FileName,
+		FileType: file.FilePostfix,
 		Size:     file.Size,
 	}
 }

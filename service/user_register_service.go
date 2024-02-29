@@ -3,12 +3,18 @@ package service
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 )
 
 type UserRegisterService struct {
 	NickName string `form:"nickname" json:"nickname" binding:"required,min=2,max=30"`
-	UserName string `form:"username" json:"username" binding:"required,min=5,max=30"`
-	Password string `form:"password" json:"password" binding:"required,min=8,max=40"`
+	UserName string `form:"username" json:"username" binding:"required,min=3,max=30"`
+	Password string `form:"password" json:"password" binding:"required,min=3,max=40"`
+}
+
+type registerResponse struct {
+	Token string `json:"token"`
+	serializer.User
 }
 
 // vaild check if regiser info correct
@@ -60,5 +66,14 @@ func (service *UserRegisterService) Register() serializer.Response {
 		return serializer.ParamsErr("create user error", err)
 	}
 
-	return serializer.Success(serializer.BuildUser(user))
+	// signed jwt token
+	token, err := utils.GenToken("miaoqiu", 24, &user)
+	if err != nil {
+		return serializer.Err(serializer.CodeError, "token generate error", err)
+	}
+
+	return serializer.Success(registerResponse{
+		Token: token,
+		User:  serializer.BuildUser(user),
+	})
 }

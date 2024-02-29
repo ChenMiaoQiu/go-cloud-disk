@@ -8,14 +8,13 @@ import (
 )
 
 type FileDeleteService struct {
-	FileId string `json:"id" form:"id" binding:"required"`
 }
 
 // FileDelete delete file and updata user store
-func (service *FileDeleteService) FileDelete(userId string) serializer.Response {
+func (service *FileDeleteService) FileDelete(userId string, fileid string) serializer.Response {
 	var userFile model.File
 	var userStore model.FileStore
-	if err := model.DB.Where("uuid = ?", service.FileId).Find(&userFile).Error; err != nil {
+	if err := model.DB.Where("uuid = ?", fileid).Find(&userFile).Error; err != nil {
 		return serializer.DBErr("get file err when delete file", err)
 	}
 	fmt.Println(userFile.Owner, userId)

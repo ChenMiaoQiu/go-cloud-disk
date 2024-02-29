@@ -11,11 +11,10 @@ func NewRouter() *gin.Engine {
 
 	r.MaxMultipartMemory = 8 << 20 // set upload speed
 	r.Use(middleware.Cors())
+	r.GET("ping", api.Ping)
 
 	v1 := r.Group("/api/v1")
 	{
-		v1.GET("ping", api.Ping)
-
 		v1.POST("user/login", api.UserLogin)
 		v1.POST("user/register", api.UserRegiser)
 
@@ -25,13 +24,13 @@ func NewRouter() *gin.Engine {
 			auth.GET("user/:id", api.UserInfo)
 			auth.GET("user", api.UserMyInfo)
 
-			auth.GET("file", api.GetDownloadURL)
+			auth.GET("file/:fileid", api.GetDownloadURL)
 			auth.POST("file", api.UploadFile)
-			auth.DELETE("file", api.DeleteFile)
+			auth.DELETE("file/:fileid", api.DeleteFile)
 
-			auth.GET("files", api.GetFilefolderAllFile)
-
-			auth.GET("filefolder", api.GetFilefolderAllFilefolder)
+			auth.POST("filefolder", api.CreateFileFolder)
+			auth.GET("filefolder/:filefolderid/file", api.GetFilefolderAllFile)
+			auth.GET("filefolder/:filefolderid/filefolder", api.GetFilefolderAllFilefolder)
 		}
 	}
 

@@ -16,7 +16,7 @@ func splitFilename(str string) (filename string, extend string) {
 	for i := len(str) - 1; i >= 0 && str[i] != '/'; i-- {
 		if str[i] == '.' {
 			if i != 0 {
-				filename = str[:i-1]
+				filename = str[:i]
 			}
 			if i != len(str)-1 {
 				extend = str[i+1:]
@@ -92,5 +92,5 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		return serializer.DBErr("updata userstore size err when upload file", err)
 	}
 
-	return serializer.Success(nil)
+	return serializer.Success(serializer.BuildFile(*fileModel))
 }

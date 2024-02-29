@@ -2,8 +2,11 @@ package utils
 
 type CloudDisk interface {
 	// GetUploadPresignedURL generate presigned URL.
-	// user can use presigned url to download file
+	// user can use presigned url to upload file by put method
 	GetUploadPresignedURL(userId string, filePath string, fileName string) (string, error)
+	// GetDownloadPresignedURL generate presigned URL.
+	// user can use presigned url to download file by get method
+	GetDownloadPresignedURL(userId string, filePath string, fileName string) (string, error)
 	// GetObjectURL generate a object URL. User can use URL to view the file.
 	GetObjectURL(userId string, filePath string, fileName string) (string, error)
 	// DeleteObject delete user object

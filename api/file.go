@@ -40,8 +40,9 @@ func GetDownloadURL(c *gin.Context) {
 		return
 	}
 
+	fileId := c.Param("fileid")
 	userIdInJWT := c.MustGet("UserId").(string)
-	res := service.GetDownloadURL(userIdInJWT)
+	res := service.GetDownloadURL(userIdInJWT, fileId)
 	c.JSON(200, res)
 }
 
@@ -65,7 +66,8 @@ func DeleteFile(c *gin.Context) {
 		return
 	}
 
+	fileid := c.Param("fileid")
 	userId := c.MustGet("UserId").(string)
-	res := service.FileDelete(userId)
+	res := service.FileDelete(userId, fileid)
 	c.JSON(200, res)
 }
