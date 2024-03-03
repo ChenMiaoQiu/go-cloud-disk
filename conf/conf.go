@@ -3,8 +3,9 @@ package conf
 import (
 	"os"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
+	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
-	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 	"github.com/joho/godotenv"
 )
 
@@ -12,8 +13,11 @@ func Init() {
 	// get env
 	godotenv.Load()
 	// set cloud disk
-	utils.SetBaseCloudDisk(os.Getenv("CLOUD_DISK_VERSION"))
+	disk.SetBaseCloudDisk(os.Getenv("CLOUD_DISK_VERSION"))
 
-	//connect database
+	// connect database
 	model.Database(os.Getenv("MYSQL_DSN"))
+
+	// connect redis
+	cache.Redis()
 }

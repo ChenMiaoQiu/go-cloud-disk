@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	"github.com/ChenMiaoQiu/go-cloud-disk/service"
+	"github.com/ChenMiaoQiu/go-cloud-disk/service/user"
 	"github.com/gin-gonic/gin"
 )
 
 // UserLogin user login api
 func UserLogin(c *gin.Context) {
-	var service service.UserLoginService
+	var service user.UserLoginService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -20,7 +20,7 @@ func UserLogin(c *gin.Context) {
 
 // UserRegiser user register api
 func UserRegiser(c *gin.Context) {
-	var service service.UserRegisterService
+	var service user.UserRegisterService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -32,7 +32,7 @@ func UserRegiser(c *gin.Context) {
 
 // UserInfo get user info
 func UserInfo(c *gin.Context) {
-	var service service.UserInfoService
+	var service user.UserInfoService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -44,8 +44,7 @@ func UserInfo(c *gin.Context) {
 
 // UserMyInfo get user info form jwt info
 func UserMyInfo(c *gin.Context) {
-	var service service.UserInfoService
-
+	var service user.UserInfoService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -53,5 +52,17 @@ func UserMyInfo(c *gin.Context) {
 
 	userIdString := c.MustGet("UserId").(string)
 	res := service.GetUserInfo(userIdString)
+	c.JSON(200, res)
+}
+
+// UpdateUserInfo update user nickname
+func UpdateUserInfo(c *gin.Context) {
+	var service user.UserUpdateService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+	userId := c.MustGet("UserId").(string)
+	res := service.UpdateUserInfo(userId)
 	c.JSON(200, res)
 }

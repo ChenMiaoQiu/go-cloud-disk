@@ -1,11 +1,11 @@
-package service
+package file
 
 import (
 	"fmt"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 )
 
 type FileGetDownloadURLService struct {
@@ -26,7 +26,7 @@ func (service *FileGetDownloadURLService) GetDownloadURL(userId string, fileid s
 	}
 
 	fileName := file.FileUuid + "." + file.FilePostfix
-	url, err := utils.BaseCloudDisk.GetObjectURL(userId, "", fileName)
+	url, err := disk.BaseCloudDisk.GetObjectURL(userId, "", fileName)
 	if err != nil {
 		return serializer.ErrorResponse(fmt.Errorf("can't get object url %v", err))
 	}

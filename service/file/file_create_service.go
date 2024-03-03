@@ -1,6 +1,7 @@
-package service
+package file
 
 import (
+	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
@@ -17,7 +18,7 @@ type FileCreateService struct {
 func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 	// check if the file was successfully uploaded to the cloud
 	uploadFileNameInCloud := utils.FastBuildFileName(service.FileUuid, service.FilePostfix)
-	successUpload, err := utils.BaseCloudDisk.IsObjectExist(owner, "", uploadFileNameInCloud)
+	successUpload, err := disk.BaseCloudDisk.IsObjectExist(owner, "", uploadFileNameInCloud)
 	if err != nil {
 		return serializer.ErrorResponse(err)
 	}
@@ -43,6 +44,7 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 		FileUuid:       service.FileUuid,
 		ParentFolderId: service.ParentFolderId,
 		Size:           service.Size,
+		FilePath:       owner,
 	}
 
 	if err = model.DB.Create(&file).Error; err != nil {

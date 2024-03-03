@@ -1,4 +1,4 @@
-package utils
+package disk
 
 import (
 	"context"
@@ -170,6 +170,7 @@ func (cloud *TencentCloudDisk) deleteFilefold(dir string) error {
 	return nil
 }
 
+// DeleteObjectFilefolder delete user filefolder in cloud
 func (cloud *TencentCloudDisk) DeleteObjectFilefolder(userId string, filePath string) error {
 	key := fastBuildKey(userId, filePath, "")
 	err := cloud.deleteFilefold(key)

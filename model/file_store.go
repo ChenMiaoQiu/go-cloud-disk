@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -22,7 +24,16 @@ func (fileStore *FileStore) BeforeCreate(tx *gorm.DB) (err error) {
 
 // AddCurrentSize add size to currentsize
 func (fileStore *FileStore) AddCurrentSize(size int64) (err error) {
+	if fileStore.CurrentSize+size > fileStore.MaxSize {
+		return fmt.Errorf("add size exceed currentSize")
+	}
 	fileStore.CurrentSize += size
+	return nil
+}
+
+// SubCurrentSize sub size to cueerentsize
+func (fileStore *FileStore) SubCurrentSize(size int64) (err error) {
+	fileStore.CurrentSize = max(fileStore.CurrentSize-size, 0)
 	return nil
 }
 

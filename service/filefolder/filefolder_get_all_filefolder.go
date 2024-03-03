@@ -1,4 +1,4 @@
-package service
+package filefolder
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"

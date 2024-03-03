@@ -1,4 +1,4 @@
-package service
+package user
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"

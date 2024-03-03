@@ -6,4 +6,5 @@ func migration() {
 	_ = DB.AutoMigrate(&File{})
 	_ = DB.AutoMigrate(&FileFolder{})
 	_ = DB.AutoMigrate(&FileStore{})
+	_ = DB.AutoMigrate(&Share{})
 }

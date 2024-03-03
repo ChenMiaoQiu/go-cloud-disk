@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	"github.com/ChenMiaoQiu/go-cloud-disk/service"
+	"github.com/ChenMiaoQiu/go-cloud-disk/service/file"
 	"github.com/gin-gonic/gin"
 )
 
 // GetUploadURL return uploadurl
 func GetUploadURL(c *gin.Context) {
-	var service service.GetUploadURLService
+	var service file.GetUploadURLService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -21,7 +21,7 @@ func GetUploadURL(c *gin.Context) {
 
 // CreateFile create file in the database
 func CreateFile(c *gin.Context) {
-	var service service.FileCreateService
+	var service file.FileCreateService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -34,7 +34,7 @@ func CreateFile(c *gin.Context) {
 
 // GetDownloadURL return a url to download file
 func GetDownloadURL(c *gin.Context) {
-	var service service.FileGetDownloadURLService
+	var service file.FileGetDownloadURLService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -48,7 +48,7 @@ func GetDownloadURL(c *gin.Context) {
 
 // UploadFile upload file to cloud
 func UploadFile(c *gin.Context) {
-	var service service.FileUploadService
+	var service file.FileUploadService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -60,7 +60,7 @@ func UploadFile(c *gin.Context) {
 
 // DeleteFile delete file in database, don't delete file on cloud
 func DeleteFile(c *gin.Context) {
-	var service service.FileDeleteService
+	var service file.FileDeleteService
 	if err := c.ShouldBind(&service); err != nil {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
@@ -69,5 +69,18 @@ func DeleteFile(c *gin.Context) {
 	fileid := c.Param("fileid")
 	userId := c.MustGet("UserId").(string)
 	res := service.FileDelete(userId, fileid)
+	c.JSON(200, res)
+}
+
+// UpdateFile update file info, such as remove file, update filename
+func UpdateFile(c *gin.Context) {
+	var service file.FileUpdateService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	userId := c.MustGet("UserId").(string)
+	res := service.UpdateFileInfo(userId)
 	c.JSON(200, res)
 }

@@ -1,6 +1,7 @@
-package service
+package file
 
 import (
+	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
@@ -27,6 +28,7 @@ func splitFilename(str string) (filename string, extend string) {
 	return str, ""
 }
 
+// checkIfFileSizeExceedsVolum check if upload file size exceed user filestore size
 func checkIfFileSizeExceedsVolum(userStore *model.FileStore, userId string, size int64) (bool, error) {
 	if err := model.DB.Where("owner_id = ?", userId).Find(userStore).Error; err != nil {
 		return false, err
@@ -46,7 +48,7 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		return serializer.ParamsErr("get upload file err", err)
 	}
 
-	// check if the currentSize exceeds maxsize after adding1
+	// check if the currentSize exceeds maxsize after adding
 	// the file size when save file to local
 	var isExceed bool
 	if isExceed, err = checkIfFileSizeExceedsVolum(&userStore, userId, file.Size); err != nil {
@@ -67,7 +69,7 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 	if err != nil {
 		return serializer.ParamsErr("file err", err)
 	}
-	err = utils.BaseCloudDisk.UploadSimpleFile(dst, userId, md5String, file.Size)
+	err = disk.BaseCloudDisk.UploadSimpleFile(dst, userId, md5String, file.Size)
 	if err != nil {
 		return serializer.DBErr("can't upload to cloud", err)
 	}
@@ -79,11 +81,22 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		FileName:       filename,
 		FilePostfix:    extend,
 		FileUuid:       md5String,
+		FilePath:       userId,
 		ParentFolderId: service.FolderId,
 		Size:           file.Size,
 	}
 	if err = model.DB.Create(&fileModel).Error; err != nil {
 		return serializer.DBErr("insert file to database error when upload file", err)
+	}
+
+	// add deleted file size to filefolder and parent filefolder
+	// will add rabbitMQ or kafka for enhance speed
+	var userFileFolder model.FileFolder
+	if err := model.DB.Where("uuid = ?", service.FolderId).Find(&userFileFolder).Error; err != nil {
+		return serializer.DBErr("get filefolder err when delete file", err)
+	}
+	if err := userFileFolder.AddFileFolderSize(file.Size); err != nil {
+		return serializer.DBErr("sub filefolder size err when delete file %v", err)
 	}
 
 	// updata user store now size to database

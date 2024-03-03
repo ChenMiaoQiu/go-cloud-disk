@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -11,6 +13,7 @@ type FileFolder struct {
 	ParentFolderID string
 	FileStoreID    string
 	OwnerID        string
+	Size           int64
 }
 
 // BeforeCreate create uuid before insert database
@@ -34,4 +37,60 @@ func CreateBaseFileFolder(ownerId string, fileStoreId string) (string, error) {
 		return "", err
 	}
 	return fileStore.Uuid, nil
+}
+
+// SubSize sub filefolder size
+func (fileFolder *FileFolder) SubSize(size int64) error {
+	fileFolder.Size = max(fileFolder.Size-size, 0)
+	return nil
+}
+
+// AddFileFolderSize add filefolder size and add size for parent filefolder
+func (fileFolder *FileFolder) AddFileFolderSize(appendSize int64) (err error) {
+	// add size for filefolder
+	fileFolder.Size += appendSize
+	parentId := fileFolder.ParentFolderID
+	if err := DB.Save(fileFolder).Error; err != nil {
+		return fmt.Errorf("save filefolder err when sub filesize err %v", err)
+	}
+
+	// add size for parent filefolder
+	for parentId != "root" {
+		var nowFileFolder FileFolder
+		if err := DB.Where("uuid = ?", parentId).Find(&nowFileFolder).Error; err != nil {
+			return fmt.Errorf("find filefolder err when add filesize %v", err)
+		}
+		nowFileFolder.Size += appendSize
+		if err := DB.Save(&nowFileFolder).Error; err != nil {
+			return fmt.Errorf("save filefolder err when add filesize err %v", err)
+		}
+		parentId = nowFileFolder.ParentFolderID
+	}
+
+	return err
+}
+
+// SubFileFolderSize sub filefolder size and sub size for parent filefolder
+func (fileFolder *FileFolder) SubFileFolderSize(size int64) (err error) {
+	// sub size for filefolder
+	fileFolder.SubSize(size)
+	parentId := fileFolder.ParentFolderID
+	if err := DB.Save(fileFolder).Error; err != nil {
+		return fmt.Errorf("save filefolder err when sub filesize err %v", err)
+	}
+
+	// sub size for parent filefolder
+	for parentId != "root" {
+		var nowFileFolder FileFolder
+		if err := DB.Where("uuid = ?", parentId).Find(&nowFileFolder).Error; err != nil {
+			return fmt.Errorf("find filefolder err when sub filesize %v", err)
+		}
+		nowFileFolder.SubSize(size)
+		if err := DB.Save(&nowFileFolder).Error; err != nil {
+			return fmt.Errorf("save filefolder err when sub filesize err %v", err)
+		}
+		parentId = nowFileFolder.ParentFolderID
+	}
+
+	return err
 }

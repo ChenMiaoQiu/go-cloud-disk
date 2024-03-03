@@ -10,7 +10,8 @@ type File struct {
 	Owner          string // file owner if File deleted the owner is null,
 	FileName       string // real filename
 	FilePostfix    string
-	FileUuid       string // filename in cloud
+	FileUuid       string // file used md5 as name in cloud
+	FilePath       string // file's filefolder in cloud, used for save share file
 	ParentFolderId string
 	Size           int64 // file size
 }

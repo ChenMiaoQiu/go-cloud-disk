@@ -1,8 +1,6 @@
-package service
+package file
 
 import (
-	"fmt"
-
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 )
@@ -17,7 +15,6 @@ func (service *FileDeleteService) FileDelete(userId string, fileid string) seria
 	if err := model.DB.Where("uuid = ?", fileid).Find(&userFile).Error; err != nil {
 		return serializer.DBErr("get file err when delete file", err)
 	}
-	fmt.Println(userFile.Owner, userId)
 	if userFile.Owner != userId {
 		return serializer.NotAuthErr("Unable to delete file that do not match the user")
 	}
@@ -26,11 +23,18 @@ func (service *FileDeleteService) FileDelete(userId string, fileid string) seria
 		return serializer.DBErr("get file store err when delete file", err)
 	}
 
-	// sub delete file size
-	deleteFileSize := userFile.Size
-	userStore.AddCurrentSize(-deleteFileSize)
+	// sub deleted file size to filefolder and parent filefolder
+	// will add rabbitMQ or kafka for enhance speed
+	var userFileFolder model.FileFolder
+	if err := model.DB.Where("uuid = ?", userFile.ParentFolderId).Find(&userFileFolder).Error; err != nil {
+		return serializer.DBErr("get filefolder err when delete file", err)
+	}
+	if err := userFileFolder.SubFileFolderSize(userFile.Size); err != nil {
+		return serializer.DBErr("sub filefolder size err when delete file %v", err)
+	}
 
-	// update database
+	// sub deleted file size to userstore
+	userStore.SubCurrentSize(userFile.Size)
 	if err := model.DB.Delete(&userFile).Error; err != nil {
 		return serializer.DBErr("delete file err when delete file", err)
 	}

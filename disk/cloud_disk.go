@@ -1,4 +1,4 @@
-package utils
+package disk
 
 type CloudDisk interface {
 	// GetUploadPresignedURL generate presigned URL.

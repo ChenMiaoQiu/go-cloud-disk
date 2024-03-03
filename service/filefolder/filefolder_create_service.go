@@ -1,4 +1,4 @@
-package service
+package filefolder
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
@@ -27,6 +27,7 @@ func (service *FileFolderCreateService) CreateFileFolder(userId string) serializ
 		ParentFolderID: service.ParentFolderID,
 		FileStoreID:    fileFolder.FileStoreID,
 		OwnerID:        userId,
+		Size:           0,
 	}
 
 	if err := model.DB.Create(&createFilerFolder).Error; err != nil {
