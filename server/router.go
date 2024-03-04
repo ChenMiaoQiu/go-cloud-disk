@@ -20,6 +20,8 @@ func NewRouter() *gin.Engine {
 
 		v1.GET("share/:shareId", api.GetShareInfo)
 
+		v1.GET("rank/day", api.GetDailyRank)
+
 		auth := v1.Group("")
 		auth.Use(middleware.JWTAuth())
 		{
@@ -37,6 +39,8 @@ func NewRouter() *gin.Engine {
 			auth.POST("filefolder", api.CreateFileFolder)
 			auth.PUT("filefolder", api.UpdateFileFolder)
 			auth.DELETE("filefolder/:filefolderid", api.DeleteFileFolder)
+
+			auth.GET("filestore/:filestoreId", api.GetFileStoreInfo)
 
 			auth.POST("share", api.CreateShare)
 		}

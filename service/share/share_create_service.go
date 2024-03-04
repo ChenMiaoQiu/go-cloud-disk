@@ -10,7 +10,7 @@ import (
 
 type ShareCreateService struct {
 	FileId string `json:"fileid" form:"fileid" binding:"required"`
-	Title  string `json:"title" form:"title"`
+	Title  string `json:"title" form:"title" binding:"required"`
 }
 
 type createShareSuccessResponse struct {

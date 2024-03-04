@@ -48,7 +48,6 @@ func (share *Share) ViewCount() string {
 
 // AddViewCount add share view in redis
 func (share *Share) AddViewCount() {
-	ctx := context.Background()
-	cache.RedisClient.Incr(ctx, cache.ShareKey(share.Uuid))
-	cache.RedisClient.ZIncrBy(ctx, cache.DailyRankKey, 1, share.Uuid)
+	cache.RedisClient.Incr(context.Background(), cache.ShareKey(share.Uuid))
+	cache.RedisClient.ZIncrBy(context.Background(), cache.DailyRankKey, 1, share.Uuid)
 }
