@@ -62,6 +62,7 @@ func UpdateUserInfo(c *gin.Context) {
 		c.JSON(200, serializer.ErrorResponse(err))
 		return
 	}
+
 	userId := c.MustGet("UserId").(string)
 	res := service.UpdateUserInfo(userId)
 	c.JSON(200, res)

@@ -1,6 +1,8 @@
 package file
 
 import (
+	"time"
+
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
@@ -61,7 +63,9 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 	if file == nil {
 		return serializer.ParamsErr("not file", err)
 	}
-	dst := utils.FastBuildString("./user/", userId, "/", file.Filename)
+	// save file to the specified folder for easy delete file in the future
+	uploadDay := time.Now().Format("2006-01-02")
+	dst := utils.FastBuildString("./user/", uploadDay, "/", userId, "/", file.Filename)
 	c.SaveUploadedFile(file, dst)
 
 	// upload file to cloud
@@ -89,6 +93,12 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		return serializer.DBErr("insert file to database error when upload file", err)
 	}
 
+	// updata user store now size to database
+	userStore.AddCurrentSize(file.Size)
+	if err = model.DB.Save(userStore).Error; err != nil {
+		return serializer.DBErr("updata userstore size err when upload file", err)
+	}
+
 	// add deleted file size to filefolder and parent filefolder
 	// will add rabbitMQ or kafka for enhance speed
 	var userFileFolder model.FileFolder
@@ -97,12 +107,6 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 	}
 	if err := userFileFolder.AddFileFolderSize(file.Size); err != nil {
 		return serializer.DBErr("sub filefolder size err when delete file %v", err)
-	}
-
-	// updata user store now size to database
-	userStore.AddCurrentSize(file.Size)
-	if err = model.DB.Save(userStore).Error; err != nil {
-		return serializer.DBErr("updata userstore size err when upload file", err)
 	}
 
 	return serializer.Success(serializer.BuildFile(*fileModel))

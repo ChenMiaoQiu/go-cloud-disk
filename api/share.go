@@ -31,3 +31,16 @@ func GetShareInfo(c *gin.Context) {
 	res := service.GetShareInfo(shareId)
 	c.JSON(200, res)
 }
+
+// GetUserAllShare get user all share info
+func GetUserAllShare(c *gin.Context) {
+	var service share.ShareGetAllService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	userId := c.MustGet("UserId").(string)
+	res := service.GetAllShare(userId)
+	c.JSON(200, res)
+}

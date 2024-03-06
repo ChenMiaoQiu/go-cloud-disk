@@ -20,6 +20,9 @@ func (service *DeleteFileFolderService) DeleteFileFolder(userId string, fileFold
 	}
 
 	// delete filefolder form list and protect filefolder from duplicate delete
+	if fileFolder.ParentFolderID == "root" || fileFolder.ParentFolderID == "" {
+		return serializer.ParamsErr("can't delete main filefolder", nil)
+	}
 	if err := model.DB.Delete(&fileFolder).Error; err != nil {
 		return serializer.DBErr("delete filefolder err when delete filefolder func", err)
 	}
@@ -37,7 +40,7 @@ func (service *DeleteFileFolderService) DeleteFileFolder(userId string, fileFold
 
 	// delete filefolder size from userSotre
 	var userStore model.FileStore
-	if err := model.DB.Where("uuid = ?", fileFolder.FileStoreID).Error; err != nil {
+	if err := model.DB.Where("uuid = ?", fileFolder.FileStoreID).Find(&userStore).Error; err != nil {
 		return serializer.DBErr("can't find userStore when delete filefolder", err)
 	}
 	if userStore.OwnerID != userId {

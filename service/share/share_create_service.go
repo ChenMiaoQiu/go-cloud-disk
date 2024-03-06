@@ -32,6 +32,8 @@ func (service *ShareCreateService) CreateShare(userId string) serializer.Respons
 		Owner:       userId,
 		FileId:      service.FileId,
 		Title:       service.Title,
+		Size:        shareFile.Size,
+		FileName:    shareFile.FileName + "." + shareFile.FilePostfix,
 		SharingTime: time.Unix(time.Now().Unix(), 0).Format(utils.DefaultTimeTemplate),
 	}
 	if err := model.DB.Create(&newShare).Error; err != nil {

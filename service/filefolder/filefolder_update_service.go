@@ -13,7 +13,7 @@ type FileFolderUpdateService struct {
 
 func (service *FileFolderUpdateService) UpdateFileFolderInfo(userid string) serializer.Response {
 	var filefolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.FileFolderId).Error; err != nil {
+	if err := model.DB.Where("uuid = ?", service.FileFolderId).Find(&filefolder).Error; err != nil {
 		return serializer.DBErr("find filefolder err when update filefolde info", err)
 	}
 
@@ -23,12 +23,16 @@ func (service *FileFolderUpdateService) UpdateFileFolderInfo(userid string) seri
 	}
 
 	// check target filefoler owner
-	var parentFilefolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.NewParentId).Error; err != nil {
-		return serializer.DBErr("find parent filefolder err when update filefolder info", err)
+	var targetFilefolder model.FileFolder
+	if err := model.DB.Where("uuid = ?", service.NewParentId).Find(&targetFilefolder).Error; err != nil {
+		return serializer.DBErr("find target filefolder err when update filefolder info", err)
 	}
-	if userid != parentFilefolder.OwnerID {
+	if userid != targetFilefolder.OwnerID {
 		return serializer.NotAuthErr("can't match filefolder owner")
+	}
+	var parentFilefolder model.FileFolder
+	if err := model.DB.Where("uuid = ?", filefolder.ParentFolderID).Find(&parentFilefolder).Error; err != nil {
+		return serializer.DBErr("find parent filefolder err when update filefolder info", err)
 	}
 
 	// get new filefolder info
@@ -43,5 +47,12 @@ func (service *FileFolderUpdateService) UpdateFileFolderInfo(userid string) seri
 	if err := model.DB.Save(&filefolder).Error; err != nil {
 		return serializer.DBErr("save filefolder info err when update filefolder info", err)
 	}
+
+	// change filefolder size
+	if targetFilefolder.Uuid != parentFilefolder.Uuid {
+		parentFilefolder.SubFileFolderSize(filefolder.Size)
+		targetFilefolder.AddFileFolderSize(filefolder.Size)
+	}
+
 	return serializer.Success(nil)
 }

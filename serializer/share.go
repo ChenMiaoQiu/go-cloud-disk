@@ -7,9 +7,11 @@ type Share struct {
 	FileId      string `json:"sharefileid"`
 	Owner       string `json:"owner"`
 	Title       string `json:"title"`
+	Filename    string `json:"filename"`
 	SharingTime string `json:"sharetime"`
 	View        string `json:"view"`
 	DownloadURL string `json:"downloadurl,omitempty"`
+	Size        int64  `json:"filesize"`
 }
 
 func BuildShare(share model.Share) Share {
@@ -18,8 +20,10 @@ func BuildShare(share model.Share) Share {
 		FileId:      share.FileId,
 		Owner:       share.Owner,
 		Title:       share.Title,
+		Filename:    share.FileName,
 		View:        share.ViewCount(),
 		SharingTime: share.SharingTime,
+		Size:        share.Size,
 	}
 }
 
@@ -29,9 +33,11 @@ func BuildShareWithDownloadUrl(share model.Share, url string) Share {
 		FileId:      share.FileId,
 		Owner:       share.Owner,
 		Title:       share.Title,
+		Filename:    share.FileName,
 		View:        share.ViewCount(),
 		SharingTime: share.SharingTime,
 		DownloadURL: url,
+		Size:        share.Size,
 	}
 }
 

@@ -55,10 +55,13 @@ func (fileFolder *FileFolder) AddFileFolderSize(appendSize int64) (err error) {
 	}
 
 	// add size for parent filefolder
-	for parentId != "root" {
+	for parentId != "root" && parentId != "" {
 		var nowFileFolder FileFolder
 		if err := DB.Where("uuid = ?", parentId).Find(&nowFileFolder).Error; err != nil {
 			return fmt.Errorf("find filefolder err when add filesize %v", err)
+		}
+		if nowFileFolder.Uuid == "" {
+			break
 		}
 		nowFileFolder.Size += appendSize
 		if err := DB.Save(&nowFileFolder).Error; err != nil {
@@ -80,10 +83,13 @@ func (fileFolder *FileFolder) SubFileFolderSize(size int64) (err error) {
 	}
 
 	// sub size for parent filefolder
-	for parentId != "root" {
+	for parentId != "root" && parentId != "" {
 		var nowFileFolder FileFolder
 		if err := DB.Where("uuid = ?", parentId).Find(&nowFileFolder).Error; err != nil {
 			return fmt.Errorf("find filefolder err when sub filesize %v", err)
+		}
+		if nowFileFolder.Uuid == "" {
+			break
 		}
 		nowFileFolder.SubSize(size)
 		if err := DB.Save(&nowFileFolder).Error; err != nil {

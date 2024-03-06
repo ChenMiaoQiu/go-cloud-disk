@@ -6,6 +6,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
+	"github.com/ChenMiaoQiu/go-cloud-disk/task"
 	"github.com/joho/godotenv"
 )
 
@@ -20,4 +21,7 @@ func Init() {
 
 	// connect redis
 	cache.Redis()
+
+	// start regular task
+	task.CronJob()
 }

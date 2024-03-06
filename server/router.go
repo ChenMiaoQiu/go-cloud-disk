@@ -42,6 +42,7 @@ func NewRouter() *gin.Engine {
 
 			auth.GET("filestore/:filestoreId", api.GetFileStoreInfo)
 
+			auth.GET("share", api.GetUserAllShare)
 			auth.POST("share", api.CreateShare)
 		}
 	}
