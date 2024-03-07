@@ -44,6 +44,7 @@ func NewRouter() *gin.Engine {
 
 			auth.GET("share", api.GetUserAllShare)
 			auth.POST("share", api.CreateShare)
+			auth.DELETE("share/:shareId", api.DeleteShare)
 		}
 	}
 

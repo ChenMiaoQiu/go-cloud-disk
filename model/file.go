@@ -1,6 +1,11 @@
 package model
 
 import (
+	"context"
+	"math/rand"
+	"time"
+
+	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -22,4 +27,16 @@ func (file *File) BeforeCreate(tx *gorm.DB) (err error) {
 		file.Uuid = uuid.New().String()
 	}
 	return
+}
+
+// GetFileInfoFromRedis get file upload path form redis
+func GetFileInfoFromRedis(md5 string) string {
+	filePath := cache.RedisClient.Get(context.Background(), cache.FileInfoStoreKey(md5)).Val()
+	return filePath
+}
+
+// SaveFileUploadInfoToRedis save file path to redis
+func (file *File) SaveFileUploadInfoToRedis() {
+	randTime := time.Hour*12 + time.Minute*time.Duration(rand.Intn(60))
+	cache.RedisClient.Set(context.Background(), cache.FileInfoStoreKey(file.FileUuid), file.FilePath, randTime)
 }

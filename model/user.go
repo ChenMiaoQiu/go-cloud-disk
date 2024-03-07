@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -21,6 +22,8 @@ type User struct {
 const (
 	// PasswordCount password encryption difficulty
 	PasswordCount = 12
+	// super admin
+	StatusSuperAdmin = "super_admin"
 	// admin User
 	StatusAdmin = "common_admin"
 	// active User
@@ -63,6 +66,23 @@ func (user *User) CreateUser() error {
 	user.UserMainFileFolderID = mainFileFolderId
 	if err := DB.Create(user).Error; err != nil {
 		return fmt.Errorf("create User error %v", err)
+	}
+
+	return nil
+}
+
+func createSuperAdmin() error {
+	admin := User{
+		UserName: os.Getenv("ADMIN_USERNAME"),
+		NickName: os.Getenv("ADMIN_USERNAME"),
+		Status:   StatusSuperAdmin,
+	}
+
+	if err := admin.SetPassword(os.Getenv("ADMIN_PASSWORD")); err != nil {
+		return fmt.Errorf("set password err when set superadmin %v", err)
+	}
+	if err := admin.CreateUser(); err != nil {
+		return fmt.Errorf("create user err when set superadmin %v", err)
 	}
 
 	return nil

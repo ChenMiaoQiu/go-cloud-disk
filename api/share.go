@@ -44,3 +44,16 @@ func GetUserAllShare(c *gin.Context) {
 	res := service.GetAllShare(userId)
 	c.JSON(200, res)
 }
+
+func DeleteShare(c *gin.Context) {
+	var service share.ShareDeleteService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	shareId := c.Param("shareId")
+	userId := c.MustGet("UserId").(string)
+	res := service.DeleteShare(shareId, userId)
+	c.JSON(200, res)
+}

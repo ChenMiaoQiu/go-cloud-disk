@@ -14,22 +14,6 @@ type FileUploadService struct {
 	FolderId string `form:"filefolder" json:"filefolder" binding:"required"`
 }
 
-// splitFilename split file.filename to filename and extend name
-func splitFilename(str string) (filename string, extend string) {
-	for i := len(str) - 1; i >= 0 && str[i] != '/'; i-- {
-		if str[i] == '.' {
-			if i != 0 {
-				filename = str[:i]
-			}
-			if i != len(str)-1 {
-				extend = str[i+1:]
-			}
-			return
-		}
-	}
-	return str, ""
-}
-
 // checkIfFileSizeExceedsVolum check if upload file size exceed user filestore size
 func checkIfFileSizeExceedsVolum(userStore *model.FileStore, userId string, size int64) (bool, error) {
 	if err := model.DB.Where("owner_id = ?", userId).Find(userStore).Error; err != nil {
@@ -50,8 +34,7 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		return serializer.ParamsErr("get upload file err", err)
 	}
 
-	// check if the currentSize exceeds maxsize after adding
-	// the file size when save file to local
+	// check if the currentSize exceeds maxsize after adding the file size
 	var isExceed bool
 	if isExceed, err = checkIfFileSizeExceedsVolum(&userStore, userId, file.Size); err != nil {
 		return serializer.DBErr("get user store err when upload file", err)
@@ -60,6 +43,7 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		return serializer.ParamsErr("upload file size exceed user maxsize", nil)
 	}
 
+	// save file to local
 	if file == nil {
 		return serializer.ParamsErr("not file", err)
 	}
@@ -73,25 +57,33 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 	if err != nil {
 		return serializer.ParamsErr("file err", err)
 	}
-	err = disk.BaseCloudDisk.UploadSimpleFile(dst, userId, md5String, file.Size)
-	if err != nil {
-		return serializer.DBErr("can't upload to cloud", err)
+	// if the file has been recently uploaded, do not upload it to
+	// the cloud and get file info from redis
+	filePath := model.GetFileInfoFromRedis(md5String)
+	if filePath == "" {
+		err = disk.BaseCloudDisk.UploadSimpleFile(dst, userId, md5String, file.Size)
+		if err != nil {
+			return serializer.DBErr("can't upload to cloud", err)
+		}
+		filePath = userId
 	}
 
 	// insert file to database
-	filename, extend := splitFilename(file.Filename)
+	filename, extend := utils.SplitFilename(file.Filename)
 	fileModel := &model.File{
 		Owner:          userId,
 		FileName:       filename,
 		FilePostfix:    extend,
 		FileUuid:       md5String,
-		FilePath:       userId,
+		FilePath:       filePath,
 		ParentFolderId: service.FolderId,
 		Size:           file.Size,
 	}
 	if err = model.DB.Create(&fileModel).Error; err != nil {
 		return serializer.DBErr("insert file to database error when upload file", err)
 	}
+	// save file info to database
+	fileModel.SaveFileUploadInfoToRedis()
 
 	// updata user store now size to database
 	userStore.AddCurrentSize(file.Size)
@@ -100,7 +92,6 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 	}
 
 	// add deleted file size to filefolder and parent filefolder
-	// will add rabbitMQ or kafka for enhance speed
 	var userFileFolder model.FileFolder
 	if err := model.DB.Where("uuid = ?", service.FolderId).Find(&userFileFolder).Error; err != nil {
 		return serializer.DBErr("get filefolder err when delete file", err)

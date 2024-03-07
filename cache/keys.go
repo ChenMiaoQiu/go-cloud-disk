@@ -18,3 +18,8 @@ func ShareKey(id string) string {
 func ShareInfoKey(id string) string {
 	return fmt.Sprintf("info:share:%s", id)
 }
+
+// FileStoreKey use id to build file store info key in cache
+func FileInfoStoreKey(id string) string {
+	return fmt.Sprintf("file:cloud:%s", id)
+}

@@ -26,7 +26,7 @@ func (service *FileGetDownloadURLService) GetDownloadURL(userId string, fileid s
 	}
 
 	fileName := file.FileUuid + "." + file.FilePostfix
-	url, err := disk.BaseCloudDisk.GetObjectURL(userId, "", fileName)
+	url, err := disk.BaseCloudDisk.GetObjectURL(file.FilePath, "", fileName)
 	if err != nil {
 		return serializer.ErrorResponse(fmt.Errorf("can't get object url %v", err))
 	}

@@ -119,3 +119,8 @@ func (share *Share) CheckRedisExistsShare() bool {
 	share.FileId, _ = cache.RedisClient.HGet(context.Background(), cache.ShareInfoKey(share.Uuid), "Title").Result()
 	return share.FileId != "" || cache.RedisClient.SIsMember(context.Background(), cache.EmptyShare, share.Uuid).Val()
 }
+
+// DeleteShareInfoInRedis delete share info that in redis
+func (share *Share) DeleteShareInfoInRedis() {
+	_ = cache.RedisClient.Del(context.Background(), cache.ShareInfoKey(share.Uuid)).Val()
+}

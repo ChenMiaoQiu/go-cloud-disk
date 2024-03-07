@@ -24,8 +24,8 @@ func (cloud *TencentCloudDisk) getDefaultClient() *cos.Client {
 	b := &cos.BaseURL{BucketURL: u}
 	c := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
-			SecretID:  os.Getenv("SECRET_ID"),
-			SecretKey: os.Getenv("SECRET_KEY"),
+			SecretID:  cloud.secretId,
+			SecretKey: cloud.secretKey,
 		},
 	})
 	return c
@@ -221,9 +221,9 @@ func (cloud *TencentCloudDisk) UploadSimpleFile(localFilePath string, userId str
 		return err
 	}
 
-	key := fastBuildKey(userId, "", md5+extend)
 	// if not on the cloud, upload file
 	if !ok {
+		key := fastBuildKey(userId, "", md5+extend)
 		if err = cloud.uploadSimpleFile(localFilePath, key); err != nil {
 			return err
 		}
