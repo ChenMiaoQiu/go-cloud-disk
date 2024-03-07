@@ -20,10 +20,8 @@ func NewRouter() *gin.Engine {
 
 		v1.GET("share/:shareId", api.GetShareInfo)
 
-		v1.GET("rank/day", api.GetDailyRank)
-
 		auth := v1.Group("")
-		auth.Use(middleware.JWTAuth())
+		auth.Use(middleware.JWTAuth(), middleware.CasbinAuth())
 		{
 			auth.GET("user/:id", api.UserInfo)
 			auth.GET("user", api.UserMyInfo)
@@ -45,6 +43,8 @@ func NewRouter() *gin.Engine {
 			auth.GET("share", api.GetUserAllShare)
 			auth.POST("share", api.CreateShare)
 			auth.DELETE("share/:shareId", api.DeleteShare)
+
+			v1.GET("rank/day", api.GetDailyRank)
 		}
 	}
 

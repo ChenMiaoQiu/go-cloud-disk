@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/auth"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 	"github.com/gin-gonic/gin"
@@ -47,5 +48,20 @@ func JWTAuth() gin.HandlerFunc {
 		c.Set("Status", claims.Status)
 
 		c.Next()
+	}
+}
+
+func CasbinAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// get obj and act
+		userStatus := c.MustGet("Status").(string)
+		method := c.Request.Method
+		path := c.Request.URL.Path
+		object := path[8:]
+
+		if ok, _ := auth.Casbin.Enforce(userStatus, object, method); !ok {
+			c.JSON(200, serializer.NotAuthErr("not auth"))
+			c.Abort()
+		}
 	}
 }

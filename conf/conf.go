@@ -3,6 +3,7 @@ package conf
 import (
 	"os"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/auth"
 	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
@@ -24,4 +25,7 @@ func Init() {
 
 	// start regular task
 	task.CronJob()
+
+	// start casbin
+	auth.InitCasbin()
 }
