@@ -63,6 +63,9 @@ func (share *Share) DownloadURL() (string, error) {
 // ViewCount get share view from redis
 func (share *Share) ViewCount() string {
 	countStr, _ := cache.RedisClient.Get(context.Background(), cache.ShareKey(share.Uuid)).Result()
+	if countStr == "" {
+		return "0"
+	}
 	return countStr
 }
 
@@ -122,5 +125,6 @@ func (share *Share) CheckRedisExistsShare() bool {
 
 // DeleteShareInfoInRedis delete share info that in redis
 func (share *Share) DeleteShareInfoInRedis() {
+	_ = cache.RedisClient.ZRem(context.Background(), cache.DailyRankKey, cache.ShareInfoKey(share.Uuid))
 	_ = cache.RedisClient.Del(context.Background(), cache.ShareInfoKey(share.Uuid)).Val()
 }

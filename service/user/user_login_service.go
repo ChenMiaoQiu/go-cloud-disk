@@ -30,6 +30,12 @@ func (service *UserLoginService) Login(c *gin.Context) serializer.Response {
 		return serializer.ParamsErr("账号或密码错误", nil)
 	}
 	token, err := utils.GenToken("miaoqiu", 24, &user)
+
+	// admin token only given 1 hour
+	if user.Status == model.StatusAdmin || user.Status == model.StatusSuperAdmin {
+		token, err = utils.GenToken("miaoqiu", 1, &user)
+	}
+
 	if err != nil {
 		return serializer.Err(serializer.CodeError, "token generate error", err)
 	}

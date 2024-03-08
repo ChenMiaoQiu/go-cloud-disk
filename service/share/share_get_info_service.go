@@ -41,6 +41,8 @@ func (service *ShareGetInfoService) GetShareInfo(shareid string) serializer.Resp
 	}
 
 	// add view of share
-	share.AddViewCount()
+	if downloadUrl != "" {
+		share.AddViewCount()
+	}
 	return serializer.Success(serializer.BuildShareWithDownloadUrl(share, downloadUrl))
 }

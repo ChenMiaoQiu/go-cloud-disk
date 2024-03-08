@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"log"
 	"strings"
 	"time"
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/auth"
+	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 	"github.com/gin-gonic/gin"
@@ -57,11 +59,28 @@ func CasbinAuth() gin.HandlerFunc {
 		userStatus := c.MustGet("Status").(string)
 		method := c.Request.Method
 		path := c.Request.URL.Path
-		object := path[8:]
+		object := strings.TrimPrefix(path, "/api/v1/")
 
 		if ok, _ := auth.Casbin.Enforce(userStatus, object, method); !ok {
 			c.JSON(200, serializer.NotAuthErr("not auth"))
 			c.Abort()
+		}
+	}
+}
+
+func AdminAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uuid := c.MustGet("UserId").(string)
+		var user model.User
+		if err := model.DB.Where("uuid = ?", uuid).Find(&user).Error; err != nil {
+			log.Println("get user info err when check admin auth", err)
+			c.Abort()
+			return
+		}
+		if user.Status != c.MustGet("Status").(string) {
+			c.JSON(200, serializer.NotAuthErr("change jwt!!!"))
+			c.Abort()
+			return
 		}
 	}
 }

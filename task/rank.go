@@ -8,5 +8,7 @@ import (
 
 // RestartDailyRank recalculate daily rank
 func RestartDailyRank() error {
-	return cache.RedisClient.Del(context.Background(), cache.DailyRankKey).Err()
+	// dailyrank is highly likely that a big key, use
+	// unlink delete for enhance execute speed
+	return cache.RedisClient.Unlink(context.Background(), cache.DailyRankKey).Err()
 }

@@ -44,7 +44,14 @@ func NewRouter() *gin.Engine {
 			auth.POST("share", api.CreateShare)
 			auth.DELETE("share/:shareId", api.DeleteShare)
 
-			v1.GET("rank/day", api.GetDailyRank)
+			auth.GET("rank/day", api.GetDailyRank)
+
+			admin := auth.Group("admin")
+			admin.Use(middleware.AdminAuth())
+			{
+				admin.POST("user", api.SearchUser)
+				admin.PUT("user", api.UpdateUserAuth)
+			}
 		}
 	}
 
