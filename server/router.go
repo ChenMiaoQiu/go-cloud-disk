@@ -43,6 +43,7 @@ func NewRouter() *gin.Engine {
 			auth.GET("share", api.GetUserAllShare)
 			auth.POST("share", api.CreateShare)
 			auth.DELETE("share/:shareId", api.DeleteShare)
+			auth.POST("share/file", api.ShareSaveFile)
 
 			auth.GET("rank/day", api.GetDailyRank)
 
@@ -51,6 +52,14 @@ func NewRouter() *gin.Engine {
 			{
 				admin.POST("user", api.SearchUser)
 				admin.PUT("user", api.UpdateUserAuth)
+
+				admin.POST("share", api.SearchShare)
+				admin.DELETE("share/:shareId", api.AdminDeleteShare)
+
+				admin.DELETE("file/:fileId", api.AdminDeleteFile)
+
+				admin.GET("filestore/:userId", api.AdminGetFileStoreInfo)
+				admin.PUT("filestore", api.UserFileStoreUpdate)
 			}
 		}
 	}

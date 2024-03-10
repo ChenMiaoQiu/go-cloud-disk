@@ -1,4 +1,4 @@
-package share
+package admin
 
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
@@ -8,16 +8,11 @@ import (
 type ShareDeleteService struct {
 }
 
-func (service *ShareDeleteService) DeleteShare(shareId string, userId string) serializer.Response {
+func (service *ShareDeleteService) ShareDelete(shareId string) serializer.Response {
 	// get shares from database
 	var share model.Share
 	if err := model.DB.Where("uuid = ?", shareId).Find(&share).Error; err != nil {
 		return serializer.DBErr("get share err when get all user's share", err)
-	}
-
-	// check share owner
-	if share.Owner != userId {
-		return serializer.NotAuthErr("can't match user when delete share")
 	}
 
 	if err := model.DB.Delete(&share).Error; err != nil {

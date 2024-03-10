@@ -45,6 +45,7 @@ func GetUserAllShare(c *gin.Context) {
 	c.JSON(200, res)
 }
 
+// DeleteShare delete share by shareid
 func DeleteShare(c *gin.Context) {
 	var service share.ShareDeleteService
 	if err := c.ShouldBind(&service); err != nil {
@@ -55,5 +56,18 @@ func DeleteShare(c *gin.Context) {
 	shareId := c.Param("shareId")
 	userId := c.MustGet("UserId").(string)
 	res := service.DeleteShare(shareId, userId)
+	c.JSON(200, res)
+}
+
+// ShareSaveFile save share file to user filefolder
+func ShareSaveFile(c *gin.Context) {
+	var service share.ShareSaveFileService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+
+	userId := c.MustGet("UserId").(string)
+	res := service.ShareSaveFile(userId)
 	c.JSON(200, res)
 }

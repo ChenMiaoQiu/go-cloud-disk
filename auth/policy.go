@@ -3,9 +3,11 @@ package auth
 import "github.com/ChenMiaoQiu/go-cloud-disk/model"
 
 func initPolicy() {
-	// active user
+	// add base policies
 	Casbin.AddPolicies(
 		[][]string{
+			// suspend user can't do anything
+			{model.StatusSuspendUser, "*", "*", "deny"},
 			// inactive user can't create file and filefolder
 			{model.StatusInactiveUser, "user*", "*", "allow"},
 			{model.StatusInactiveUser, "file*", "GET", "allow"},
@@ -23,6 +25,9 @@ func initPolicy() {
 			// admin user can change user status
 			{model.StatusAdmin, "admin/user*", "*", "allow"},
 			{model.StatusAdmin, "admin/login*", "*", "allow"},
+			{model.StatusAdmin, "admin/filestore*", "*", "allow"},
+			{model.StatusAdmin, "admin/share*", "*", "allow"},
+			{model.StatusAdmin, "admin/file*", "*", "allow"},
 			// super admin can do anything
 			{model.StatusSuperAdmin, "*", "*", "allow"},
 		},

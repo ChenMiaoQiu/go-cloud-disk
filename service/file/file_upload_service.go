@@ -87,17 +87,17 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 
 	// updata user store now size to database
 	userStore.AddCurrentSize(file.Size)
-	if err = model.DB.Save(userStore).Error; err != nil {
+	if err = model.DB.Save(&userStore).Error; err != nil {
 		return serializer.DBErr("updata userstore size err when upload file", err)
 	}
 
 	// add deleted file size to filefolder and parent filefolder
 	var userFileFolder model.FileFolder
 	if err := model.DB.Where("uuid = ?", service.FolderId).Find(&userFileFolder).Error; err != nil {
-		return serializer.DBErr("get filefolder err when delete file", err)
+		return serializer.DBErr("get filefolder err when upload file", err)
 	}
 	if err := userFileFolder.AddFileFolderSize(file.Size); err != nil {
-		return serializer.DBErr("sub filefolder size err when delete file %v", err)
+		return serializer.DBErr("sub filefolder size err when upload file %v", err)
 	}
 
 	return serializer.Success(serializer.BuildFile(*fileModel))

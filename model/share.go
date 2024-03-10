@@ -125,6 +125,6 @@ func (share *Share) CheckRedisExistsShare() bool {
 
 // DeleteShareInfoInRedis delete share info that in redis
 func (share *Share) DeleteShareInfoInRedis() {
-	_ = cache.RedisClient.ZRem(context.Background(), cache.DailyRankKey, cache.ShareInfoKey(share.Uuid))
+	_ = cache.RedisClient.ZRem(context.Background(), cache.DailyRankKey, share.Uuid)
 	_ = cache.RedisClient.Del(context.Background(), cache.ShareInfoKey(share.Uuid)).Val()
 }

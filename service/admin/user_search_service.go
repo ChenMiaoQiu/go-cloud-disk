@@ -11,6 +11,7 @@ type UserSearchService struct {
 	Status   string `json:"status" form:"status"`
 }
 
+// UserSearch search user by uuid or nickname or status
 func (service *UserSearchService) UserSearch() serializer.Response {
 	var users []model.User
 
