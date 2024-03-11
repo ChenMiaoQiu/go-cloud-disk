@@ -23,3 +23,13 @@ func ShareInfoKey(id string) string {
 func FileInfoStoreKey(id string) string {
 	return fmt.Sprintf("file:cloud:%s", id)
 }
+
+// EmailConfirmKey use to store confirm code in cache
+func EmailCodeKey(email string) string {
+	return fmt.Sprintf("email:%s", email)
+}
+
+// RecentSendUserKey store user's required in recent
+func RecentSendUserKey(email string) string {
+	return fmt.Sprintf("user:confirm:%s", email)
+}

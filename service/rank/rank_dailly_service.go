@@ -2,6 +2,7 @@ package rank
 
 import (
 	"context"
+	"sort"
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
@@ -20,13 +21,11 @@ func (service *GetDailyRankService) GetDailyRank() serializer.Response {
 		return serializer.DBErr("get daily rank err in cache", err)
 	}
 
-	// get share info from database by share id
-	for _, shareId := range shareRank {
-		var share model.Share
-		if err := model.DB.Where("uuid = ?", shareId).Find(&share).Error; err != nil {
-			return serializer.DBErr("get share err when get daily rank", err)
+	if len(shareRank) > 1 {
+		err := model.DB.Model(&model.Share{}).Where("uuid in (?)", shareRank).Find(&shares).Error
+		if err != nil {
+			return serializer.DBErr("can't find share info from database when get share rank", err)
 		}
-		shares = append(shares, share)
 	}
 
 	// fill empty share to share
@@ -41,5 +40,11 @@ func (service *GetDailyRankService) GetDailyRank() serializer.Response {
 		shares = append(shares, emptyShare)
 	}
 
-	return serializer.Success(serializer.BuildShares(shares))
+	// sort shares
+	rspShare := serializer.BuildShares(shares)
+	sort.Slice(rspShare, func(i, j int) bool {
+		return rspShare[i].View > rspShare[j].View
+	})
+
+	return serializer.Success(rspShare)
 }

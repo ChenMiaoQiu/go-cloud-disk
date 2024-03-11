@@ -9,7 +9,7 @@ type Share struct {
 	Title       string `json:"title"`
 	Filename    string `json:"filename"`
 	SharingTime string `json:"sharetime"`
-	View        string `json:"view"`
+	View        int64  `json:"view"`
 	DownloadURL string `json:"downloadurl,omitempty"`
 	Size        int64  `json:"filesize"`
 }

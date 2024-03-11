@@ -17,6 +17,7 @@ func NewRouter() *gin.Engine {
 	{
 		v1.POST("user/login", api.UserLogin)
 		v1.POST("user/register", api.UserRegiser)
+		v1.POST("user/email", api.ConfirmUserEmail)
 
 		v1.GET("share/:shareId", api.GetShareInfo)
 

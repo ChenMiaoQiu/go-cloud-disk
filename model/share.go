@@ -61,12 +61,13 @@ func (share *Share) DownloadURL() (string, error) {
 }
 
 // ViewCount get share view from redis
-func (share *Share) ViewCount() string {
+func (share *Share) ViewCount() (num int64) {
 	countStr, _ := cache.RedisClient.Get(context.Background(), cache.ShareKey(share.Uuid)).Result()
 	if countStr == "" {
-		return "0"
+		return 0
 	}
-	return countStr
+	num, _ = strconv.ParseInt(countStr, 10, 64)
+	return
 }
 
 // DailyViewCount get daily view count by share uuid

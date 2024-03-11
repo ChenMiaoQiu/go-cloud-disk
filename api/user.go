@@ -67,3 +67,14 @@ func UpdateUserInfo(c *gin.Context) {
 	res := service.UpdateUserInfo(userId)
 	c.JSON(200, res)
 }
+
+// ConfirmUserEmail send confirm email
+func ConfirmUserEmail(c *gin.Context) {
+	var service user.UserSendConfirmEmailService
+	if err := c.ShouldBind(&service); err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+	res := service.SendConfirmEmail()
+	c.JSON(200, res)
+}
