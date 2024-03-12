@@ -1,7 +1,6 @@
 package task
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -20,9 +19,9 @@ func Run(jobName string, job jobFunc) {
 	to := time.Now().UnixNano()
 	if err != nil {
 		log.Println(err)
-		fmt.Printf("%s error: %dms\n", jobName, (to-from)/int64(time.Millisecond))
+		log.Printf("%s error: %dms\n", jobName, (to-from)/int64(time.Millisecond))
 	} else {
-		fmt.Printf("%s success: %dms\n", jobName, (to-from)/int64(time.Millisecond))
+		log.Printf("%s success: %dms\n", jobName, (to-from)/int64(time.Millisecond))
 	}
 }
 
@@ -38,5 +37,5 @@ func CronJob() {
 	Cron.AddFunc("0 0 1 * * *", func() { Run("restart delete last day file", DeleteLastDayFile) })
 	Cron.Start()
 
-	fmt.Println("cron job start")
+	log.Println("cron job start")
 }

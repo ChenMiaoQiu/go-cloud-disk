@@ -54,7 +54,6 @@ func (share *Share) DownloadURL() (string, error) {
 
 	url, err := disk.BaseCloudDisk.GetObjectURL(file.FilePath, "", file.FileUuid+"."+file.FilePostfix)
 	if err != nil {
-		fmt.Println(file.FilePath, " ", file.FileUuid+"."+file.FilePostfix)
 		return "", fmt.Errorf("get object url err when get share download url, %v", err)
 	}
 	return url, nil

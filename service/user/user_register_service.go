@@ -1,6 +1,9 @@
 package user
 
 import (
+	"context"
+
+	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
@@ -8,8 +11,9 @@ import (
 
 type UserRegisterService struct {
 	NickName string `form:"nickname" json:"nickname" binding:"required,min=2,max=30"`
-	UserName string `form:"username" json:"username" binding:"required,min=3,max=30"`
+	UserName string `form:"username" json:"username" binding:"required,min=3,max=80"`
 	Password string `form:"password" json:"password" binding:"required,min=3,max=40"`
+	Code     string `form:"code" json:"code" binding:"required,min=6,max=6"`
 }
 
 type registerResponse struct {
@@ -19,6 +23,12 @@ type registerResponse struct {
 
 // vaild check if regiser info correct
 func (service *UserRegisterService) vaild() *serializer.Response {
+	if service.Code != cache.RedisClient.Get(context.Background(), cache.EmailCodeKey(service.UserName)).Val() {
+		return &serializer.Response{
+			Code: serializer.CodeParamsError,
+			Msg:  "Code can't matched",
+		}
+	}
 	// check nickname
 	count := int64(0)
 	model.DB.Model(&model.User{}).Where("nick_name = ?", service.NickName).Count(&count)

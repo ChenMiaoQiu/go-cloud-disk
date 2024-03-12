@@ -5,10 +5,17 @@ import (
 	"fmt"
 	"net/smtp"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/jordan-wright/email"
 )
+
+func VerifyEmailFormat(email string) bool {
+	pattern := `^[^\s@]+@[^\s@]+\.[^\s@]+$` //match email
+	reg := regexp.MustCompile(pattern)
+	return reg.MatchString(email)
+}
 
 // sendMessage use defaultSmtpAuth to send email, If it runs for more
 // than 900ms, it is automatically considered to have been sent successfully.
