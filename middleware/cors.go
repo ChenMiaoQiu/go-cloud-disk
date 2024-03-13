@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"os"
 	"regexp"
 
 	"github.com/gin-contrib/cors"
@@ -14,7 +15,7 @@ func Cors() gin.HandlerFunc {
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Cookie", "Authorization"}
 	if gin.Mode() == gin.ReleaseMode {
 		// The production environment needs to be configured with cross domain domain names
-		config.AllowOrigins = []string{"http://www.example.com"}
+		config.AllowOrigins = []string{os.Getenv("FRONT_WEB")}
 	} else {
 		// In testing environment, fuzzy match the request from local
 		config.AllowOriginFunc = func(origin string) bool {

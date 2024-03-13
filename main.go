@@ -27,6 +27,7 @@ func main() {
 		Addr:    ":" + os.Getenv("SERVER_PORT"),
 		Handler: r,
 	}
+
 	go func() {
 		// connect serve
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

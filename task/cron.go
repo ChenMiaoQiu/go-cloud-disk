@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"github.com/robfig/cron/v3"
 )
 
@@ -18,10 +19,9 @@ func Run(jobName string, job jobFunc) {
 	err := job()
 	to := time.Now().UnixNano()
 	if err != nil {
-		log.Println(err)
-		log.Printf("%s error: %dms\n", jobName, (to-from)/int64(time.Millisecond))
+		loglog.Log().Error("%s error: %dms\n err:%v", jobName, (to-from)/int64(time.Millisecond), err)
 	} else {
-		log.Printf("%s success: %dms\n", jobName, (to-from)/int64(time.Millisecond))
+		loglog.Log().Info("%s success: %dms\n", jobName, (to-from)/int64(time.Millisecond))
 	}
 }
 

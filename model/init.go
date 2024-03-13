@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,10 +19,10 @@ func Database(connString string) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			Colorful:                  false,       // Disable color
+			SlowThreshold:             time.Second,  // Slow SQL threshold
+			LogLevel:                  logger.Error, // Log level
+			IgnoreRecordNotFoundError: true,         // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,        // Disable color
 		},
 	)
 	db, err := gorm.Open(mysql.Open(connString), &gorm.Config{
@@ -29,12 +30,14 @@ func Database(connString string) {
 	})
 
 	if connString == "" || err != nil {
-		log.Panicln(err)
+		loglog.Log().Error("mysql lost: %v", err)
+		panic(err)
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Panicln(err)
+		loglog.Log().Error("mysql lost: %v", err)
+		panic(err)
 	}
 
 	sqlDB.SetMaxIdleConns(10)
