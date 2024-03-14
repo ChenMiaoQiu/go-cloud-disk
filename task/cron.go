@@ -32,9 +32,9 @@ func CronJob() {
 	}
 
 	// every day restart dailyrank in 0:0:0
-	Cron.AddFunc("0 0 0 * * *", func() { Run("restart daily rank", RestartDailyRank) })
+	Cron.AddFunc("0 0 * * * *", func() { Run("restart daily rank", RestartDailyRank) })
 	// every day delete last day file in 1:0:0
-	Cron.AddFunc("0 0 1 * * *", func() { Run("restart delete last day file", DeleteLastDayFile) })
+	Cron.AddFunc("0 1 * * * *", func() { Run("restart delete last day file", DeleteLastDayFile) })
 	Cron.Start()
 
 	log.Println("cron job start")

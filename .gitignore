@@ -7,3 +7,4 @@ __debug*
 *.png
 *.jpg
 user/*
+go-cloud-disk*
