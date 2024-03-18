@@ -4,7 +4,5 @@ go.sum
 __debug*
 *.exe
 .VScode*
-*.png
-*.jpg
 user/*
 go-cloud-disk*
