@@ -8,6 +8,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type FileUploadService struct {
@@ -21,6 +22,27 @@ func checkIfFileSizeExceedsVolum(userStore *model.FileStore, userId string, size
 	}
 	ans := userStore.CurrentSize+size > userStore.MaxSize
 	return ans, nil
+}
+
+// createFile use transaction to save user file info for user store safe
+func createFile(file *model.File, userStore *model.FileStore) error {
+	createFileFunc := func(tx *gorm.DB) error {
+		// save file info to database
+		if e := model.DB.Save(file).Error; e != nil {
+			return e
+		}
+		// add user file store volum
+		userStore.AddCurrentSize(file.Size)
+		if e := model.DB.Save(userStore).Error; e != nil {
+			return e
+		}
+		return nil
+	}
+
+	if err := model.DB.Transaction(createFileFunc); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response {
@@ -79,17 +101,14 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 		ParentFolderId: service.FolderId,
 		Size:           file.Size,
 	}
-	if err = model.DB.Create(&fileModel).Error; err != nil {
-		return serializer.DBErr("insert file to database error when upload file", err)
+
+	// insert user file info to database
+	if err := createFile(fileModel, &userStore); err != nil {
+		return serializer.DBErr("create file err when upload file", err)
 	}
+
 	// save file info to database
 	fileModel.SaveFileUploadInfoToRedis()
-
-	// updata user store now size to database
-	userStore.AddCurrentSize(file.Size)
-	if err = model.DB.Save(&userStore).Error; err != nil {
-		return serializer.DBErr("updata userstore size err when upload file", err)
-	}
 
 	// add deleted file size to filefolder and parent filefolder
 	var userFileFolder model.FileFolder

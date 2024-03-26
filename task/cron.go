@@ -1,7 +1,6 @@
 package task
 
 import (
-	"log"
 	"time"
 
 	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
@@ -32,10 +31,12 @@ func CronJob() {
 	}
 
 	// every day restart dailyrank in 0:0:0
-	Cron.AddFunc("0 0 * * * *", func() { Run("restart daily rank", RestartDailyRank) })
+	if _, err := Cron.AddFunc("@daily", func() { Run("restart daily rank", RestartDailyRank) }); err != nil {
+		loglog.Log().Error("set restart daily rank func err", err)
+	}
 	// every day delete last day file in 1:0:0
-	Cron.AddFunc("0 1 * * * *", func() { Run("restart delete last day file", DeleteLastDayFile) })
+	if _, err := Cron.AddFunc("0 1 * * *", func() { Run("delete last day file", DeleteLastDayFile) }); err != nil {
+		loglog.Log().Error("set delete last day file func err", err)
+	}
 	Cron.Start()
-
-	log.Println("cron job start")
 }

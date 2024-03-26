@@ -82,15 +82,30 @@ func (share *Share) AddViewCount() {
 }
 
 // SaveShareInRedis save share info to redis
-func (share *Share) SaveShareInfoToRedis(downloadUrl string) {
+func (share *Share) SaveShareInfoToRedis(downloadUrl string) error {
 	ctx := context.Background()
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "Owner", share.Owner)
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "FileId", share.FileId)
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "FileName", share.FileName)
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "Title", share.Title)
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "Size", share.Size)
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "SharingTime", share.SharingTime)
-	cache.RedisClient.HSet(ctx, cache.ShareInfoKey(share.Uuid), "downloadUrl", downloadUrl)
+	// if Owner is not null, it means that a func has already
+	// been written to redis
+	if s := cache.RedisClient.HGet(ctx, cache.ShareInfoKey(share.Uuid), "Owner").Val(); s != "" {
+		return nil
+	}
+
+	// use ptpeline to save share info to redis for ensure
+	// share info all write to redis
+	saveShare := cache.RedisClient.Pipeline()
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "Owner", share.Owner)
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "FileId", share.FileId)
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "FileName", share.FileName)
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "Title", share.Title)
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "Size", share.Size)
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "SharingTime", share.SharingTime)
+	saveShare.HSet(ctx, cache.ShareInfoKey(share.Uuid), "downloadUrl", downloadUrl)
+	_, err := saveShare.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetShareInfoFromRedis get share info from redis and return downloadurl

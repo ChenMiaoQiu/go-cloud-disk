@@ -3,6 +3,7 @@ package share
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type ShareGetInfoService struct {
@@ -37,7 +38,10 @@ func (service *ShareGetInfoService) GetShareInfo(shareid string) serializer.Resp
 	// for enhance search speed
 	if share.DailyViewCount() > 20 {
 		// if is empty share remove it from daily rank
-		share.SaveShareInfoToRedis(downloadUrl)
+		err := share.SaveShareInfoToRedis(downloadUrl)
+		if err != nil {
+			loglog.Log().Error(err.Error())
+		}
 	}
 
 	// add view of share

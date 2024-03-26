@@ -29,6 +29,7 @@ func main() {
 	}
 
 	go func() {
+		log.Println("go-cloud-disk server start")
 		// connect serve
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
