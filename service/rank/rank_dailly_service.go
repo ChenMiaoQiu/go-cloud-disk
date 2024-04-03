@@ -13,7 +13,7 @@ type GetDailyRankService struct {
 }
 
 func (service *GetDailyRankService) GetDailyRank() serializer.Response {
-	var shares []model.Share
+	shares := make([]model.Share, 0, 16)
 
 	// get share rank in cache
 	shareRank, err := cache.RedisClient.ZRevRange(context.Background(), cache.DailyRankKey, 0, 9).Result()
@@ -21,7 +21,7 @@ func (service *GetDailyRankService) GetDailyRank() serializer.Response {
 		return serializer.DBErr("get daily rank err in cache", err)
 	}
 
-	if len(shareRank) > 1 {
+	if len(shareRank) > 0 {
 		err := model.DB.Model(&model.Share{}).Where("uuid in (?)", shareRank).Find(&shares).Error
 		if err != nil {
 			return serializer.DBErr("can't find share info from database when get share rank", err)

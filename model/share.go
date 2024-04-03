@@ -14,7 +14,7 @@ import (
 type Share struct {
 	Uuid        string `gorm:"primarykey"`
 	Owner       string
-	FileId      string
+	FileId      string // file uuid of share file
 	FileName    string
 	Title       string
 	Size        int64

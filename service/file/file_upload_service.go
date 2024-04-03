@@ -1,13 +1,12 @@
 package file
 
 import (
-	"time"
+	"mime/multipart"
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -45,16 +44,10 @@ func createFile(file *model.File, userStore *model.FileStore) error {
 	return nil
 }
 
-func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response {
-	// get user info form jwt
-	userId := c.MustGet("UserId").(string)
-
+func (service *FileUploadService) UploadFile(userId string, file *multipart.FileHeader, dst string) serializer.Response {
 	// get user upload file and save it to local
 	var userStore model.FileStore
-	file, err := c.FormFile("file")
-	if err != nil {
-		return serializer.ParamsErr("get upload file err", err)
-	}
+	var err error
 
 	// check if the currentSize exceeds maxsize after adding the file size
 	var isExceed bool
@@ -64,15 +57,6 @@ func (service *FileUploadService) UploadFile(c *gin.Context) serializer.Response
 	if isExceed {
 		return serializer.ParamsErr("upload file size exceed user maxsize", nil)
 	}
-
-	// save file to local
-	if file == nil {
-		return serializer.ParamsErr("not file", err)
-	}
-	// save file to the specified folder for easy delete file in the future
-	uploadDay := time.Now().Format("2006-01-02")
-	dst := utils.FastBuildString("./user/", uploadDay, "/", userId, "/", file.Filename)
-	c.SaveUploadedFile(file, dst)
 
 	// upload file to cloud
 	md5String, err := utils.GetFileMD5(dst)

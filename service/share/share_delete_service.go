@@ -20,10 +20,11 @@ func (service *ShareDeleteService) DeleteShare(shareId string, userId string) se
 		return serializer.NotAuthErr("can't match user when delete share")
 	}
 
+	// delay double delete, ensure the safe of info
+	share.DeleteShareInfoInRedis()
 	if err := model.DB.Delete(&share).Error; err != nil {
 		return serializer.DBErr("delete share err when user delete share", err)
 	}
-	// delete share info that store in redis
 	share.DeleteShareInfoInRedis()
 
 	return serializer.Success(nil)

@@ -1,8 +1,13 @@
 package api
 
 import (
+	"fmt"
+	"mime/multipart"
+	"time"
+
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/service/file"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -46,6 +51,35 @@ func GetDownloadURL(c *gin.Context) {
 	c.JSON(200, res)
 }
 
+// getUploadFile get param from request
+func getUploadFileParam(c *gin.Context) (userId string, file *multipart.FileHeader, dst string, err error) {
+	userId = c.MustGet("UserId").(string)
+	file, err = c.FormFile("file")
+	if err != nil {
+		err = fmt.Errorf("get upload file err %v", err)
+		return
+	}
+	// save file to local
+	if file == nil {
+		err = fmt.Errorf("not file in parmas")
+		return
+	}
+
+	// Simple check if file size can be upload. Should use userstore to check
+	// file can be upload when allow user upload bigger file.
+	// Example, use file.checkIfFileSizeExceedsVolum() to check file can be upload
+	// In this situation, use simple check to enhance api speed
+	if file.Size > 1024*1024*10 {
+		err = fmt.Errorf("file size too bigger")
+		return
+	}
+	// save file to the specified folder for easy delete file in the future
+	uploadDay := time.Now().Format("2006-01-02")
+	dst = utils.FastBuildString("./user/", uploadDay, "/", userId, "/", file.Filename)
+	c.SaveUploadedFile(file, dst)
+	return
+}
+
 // UploadFile upload file to cloud
 func UploadFile(c *gin.Context) {
 	var service file.FileUploadService
@@ -54,7 +88,12 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
-	res := service.UploadFile(c)
+	userId, file, dst, err := getUploadFileParam(c)
+	if err != nil {
+		c.JSON(200, serializer.ErrorResponse(err))
+		return
+	}
+	res := service.UploadFile(userId, file, dst)
 	c.JSON(200, res)
 }
 

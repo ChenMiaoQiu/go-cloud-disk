@@ -6,7 +6,7 @@ api接口地址: https://www.showdoc.cc/2466392510613440?page_id=109517943359147
 
 前端项目地址: https://github.com/ChenMiaoQiu/go-cloud-disk-front
 
-项目在线地址: http://114.55.234.33/ (域名备案中)
+项目在线地址: http://114.55.234.33/ (测试账户 username:1111 password:1111)
 
 # 介绍
 
@@ -22,6 +22,34 @@ api接口地址: https://www.showdoc.cc/2466392510613440?page_id=109517943359147
 ![用户管理](images/readme/1710765901535.png)
 
 ![分享管理和简单搜索](images/readme/1710765917795.png)
+
+# 文件结构
+
+```makefile
+GO-CLOUD-DISK
+├─api // api 接口
+├─auth // casbin 权限鉴定
+├─cache // redis 连接&key name
+├─conf // 初始化配置
+├─disk // 调用云服务器api接口
+├─images // 文档演示图片
+│  └─readme
+├─middleware // 中间件
+├─model // mysql 结构
+├─serializer // 序列化器
+├─server // 路由配置
+├─service // api 具体实现service
+│  ├─admin // 管理员接口实现
+│  ├─file // 文件接口实现
+│  ├─filefolder // 文件夹接口实现
+│  ├─filestore // 用户容量接口实现
+│  ├─rank // 排行榜接口实现
+│  ├─share // 分享接口实现
+│  └─user // 用户接口实现
+├─task // 定时任务
+└─utils // 工具类
+└─log // 日志打印
+```
 
 ## 采用技术介绍
 
