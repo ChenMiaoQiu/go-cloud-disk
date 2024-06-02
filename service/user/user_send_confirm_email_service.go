@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
+	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
 )
@@ -32,6 +33,15 @@ func (service *UserSendConfirmEmailService) SendConfirmEmail() serializer.Respon
 	// check user request email times in recent
 	if cache.RedisClient.Get(context.Background(), cache.RecentSendUserKey(service.UserEmail)).Val() != "" {
 		return serializer.ParamsErr("multi request send email", nil)
+	}
+
+	// check if email has register
+	var emailNum int64
+	if err := model.DB.Model(&model.User{}).Where("user_name = ?", service.UserEmail).Count(&emailNum).Error; err != nil {
+		return serializer.DBErr("get user err", err)
+	}
+	if emailNum > 0 {
+		return serializer.ParamsErr("has register", nil)
 	}
 
 	code := getConfirmCode()
