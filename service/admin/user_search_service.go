@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserSearchService struct {
@@ -29,7 +30,8 @@ func (service *UserSearchService) UserSearch() serializer.Response {
 
 	// search user in database
 	if err := searchInfo.Find(&users).Error; err != nil {
-		return serializer.DBErr("get user info err when search user", err)
+		loglog.Log().Error("[UserSearchService.UserSearch] Fail to find user: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	return serializer.Success(serializer.BuildUsers(users))

@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserFilestoreUpdateService struct {
@@ -11,18 +12,11 @@ type UserFilestoreUpdateService struct {
 }
 
 func (service *UserFilestoreUpdateService) UserFilestoreUpdate() serializer.Response {
-	var user model.User
-	if err := model.DB.Where("uuid = ?", service.UserId).Find(&user).Error; err != nil {
-		return serializer.DBErr("get user err when admin get filestore info", err)
-	}
 	// search filestore from database
 	var userFilestore model.FileStore
-	if err := model.DB.Where("uuid = ?", user.UserFileStoreID).Find(&userFilestore).Error; err != nil {
-		return serializer.DBErr("search filestore err when update filestore volum", err)
-	}
-
-	if userFilestore.Uuid == "" {
-		return serializer.DBErr("search empty filestore when update filestore volum", nil)
+	if err := model.DB.Where("owner_id = ?", service.UserId).First(&userFilestore).Error; err != nil {
+		loglog.Log().Error("[UserFilestoreUpdateService.UserFilestoreUpdate] Fail to find filestore info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// Maximum capacity of 1GB
@@ -30,7 +24,8 @@ func (service *UserFilestoreUpdateService) UserFilestoreUpdate() serializer.Resp
 	userFilestore.MaxSize = max(0, userFilestore.MaxSize)
 
 	if err := model.DB.Save(&userFilestore).Error; err != nil {
-		return serializer.DBErr("save filestore err when update user filestore", err)
+		loglog.Log().Error("[UserFilestoreUpdateService.UserFilestoreUpdate] Fail to update filestore info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	return serializer.Success(nil)

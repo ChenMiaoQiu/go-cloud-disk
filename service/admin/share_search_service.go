@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type ShareSearchService struct {
@@ -29,7 +30,8 @@ func (service *ShareSearchService) ShareSearch() serializer.Response {
 
 	// search share from database
 	if err := searchInfo.Find(&shares).Error; err != nil {
-		return serializer.DBErr("get share info err when search share", err)
+		loglog.Log().Error("[ShareSearchService.ShareSearch] Fail to find share: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	return serializer.Success(serializer.BuildShares(shares))

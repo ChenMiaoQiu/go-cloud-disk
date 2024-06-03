@@ -37,7 +37,7 @@ func (service *UserLoginService) Login(c *gin.Context) serializer.Response {
 	}
 
 	if err != nil {
-		return serializer.Err(serializer.CodeError, "token generate error", err)
+		return serializer.InternalErr("GetTokenErr", err)
 	}
 	return serializer.Success(returnUser{
 		Token: token,

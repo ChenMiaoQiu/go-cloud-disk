@@ -2,8 +2,8 @@ package loglog
 
 import (
 	"fmt"
+	"log"
 	"os"
-	"time"
 )
 
 const (
@@ -22,7 +22,7 @@ var logger *Logger
 
 // Println print log msg with time
 func (ll *Logger) Println(msg string) {
-	fmt.Printf("%s %s", time.Now().Format("2006-01-02 15:04:05 -0700"), msg)
+	log.Println(msg)
 }
 
 // Panic print panic error
@@ -40,7 +40,7 @@ func (ll *Logger) Error(format string, v ...interface{}) {
 	if LevelError > ll.level {
 		return
 	}
-	msg := fmt.Sprintf("[E] "+format, v...)
+	msg := fmt.Sprintf("[Error] "+format, v...)
 	ll.Println(msg)
 }
 
@@ -67,7 +67,7 @@ func (ll *Logger) Debug(format string, v ...interface{}) {
 	if LevelDebug > ll.level {
 		return
 	}
-	msg := fmt.Sprintf("[D] "+format, v...)
+	msg := fmt.Sprintf("[Debug] "+format, v...)
 	ll.Println(msg)
 }
 

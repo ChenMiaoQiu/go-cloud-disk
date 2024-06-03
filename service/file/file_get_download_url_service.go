@@ -1,11 +1,10 @@
 package file
 
 import (
-	"fmt"
-
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileGetDownloadURLService struct {
@@ -18,17 +17,19 @@ type fileGetDownloadURLResponse struct {
 func (service *FileGetDownloadURLService) GetDownloadURL(userId string, fileid string) serializer.Response {
 	var file model.File
 	if err := model.DB.Where("uuid = ?", fileid).Find(&file).Error; err != nil {
-		return serializer.DBErr("can't find file", err)
+		loglog.Log().Error("[fileGetDownloadURLResponse.GetDownloadURL] Fail to find user file: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	if userId != file.Owner {
-		return serializer.NotLogin("unauth")
+		return serializer.NotAuthErr("")
 	}
 
 	fileName := file.FileUuid + "." + file.FilePostfix
 	url, err := disk.BaseCloudDisk.GetObjectURL(file.FilePath, "", fileName)
 	if err != nil {
-		return serializer.ErrorResponse(fmt.Errorf("can't get object url %v", err))
+		loglog.Log().Error("[FileGetDownloadURLService.GetDownloadURL] Fail to get download URL: ", err)
+		return serializer.InternalErr("", err)
 	}
 	return serializer.Success(fileGetDownloadURLResponse{
 		Url: url,

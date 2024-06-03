@@ -7,6 +7,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"gorm.io/gorm"
 )
 
@@ -24,21 +25,15 @@ func checkIfFileSizeExceedsVolum(userStore *model.FileStore, userId string, size
 }
 
 // createFile use transaction to save user file info for user store safe
-func createFile(file *model.File, userStore *model.FileStore) error {
-	createFileFunc := func(tx *gorm.DB) error {
-		// save file info to database
-		if e := model.DB.Save(file).Error; e != nil {
-			return e
-		}
-		// add user file store volum
-		userStore.AddCurrentSize(file.Size)
-		if e := model.DB.Save(userStore).Error; e != nil {
-			return e
-		}
-		return nil
+func createFile(t *gorm.DB, file model.File, userStore model.FileStore) error {
+	// save file info to database
+	var err error
+	if err = t.Save(file).Error; err != nil {
+		return err
 	}
-
-	if err := model.DB.Transaction(createFileFunc); err != nil {
+	// add user file store volum
+	userStore.AddCurrentSize(file.Size)
+	if err = t.Save(userStore).Error; err != nil {
 		return err
 	}
 	return nil
@@ -52,16 +47,18 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	// check if the currentSize exceeds maxsize after adding the file size
 	var isExceed bool
 	if isExceed, err = checkIfFileSizeExceedsVolum(&userStore, userId, file.Size); err != nil {
-		return serializer.DBErr("get user store err when upload file", err)
+		loglog.Log().Error("[FileUploadService.UploadFile] Fail to check user volum: ", err)
+		return serializer.DBErr("", err)
 	}
 	if isExceed {
-		return serializer.ParamsErr("upload file size exceed user maxsize", nil)
+		return serializer.ParamsErr("ExceedStoreLimit", nil)
 	}
 
 	// upload file to cloud
 	md5String, err := utils.GetFileMD5(dst)
 	if err != nil {
-		return serializer.ParamsErr("file err", err)
+		loglog.Log().Error("[FileUploadService.UploadFile] Fail to get file md5 Code: ", err)
+		return serializer.ParamsErr("", err)
 	}
 	// if the file has been recently uploaded, do not upload it to
 	// the cloud and get file info from redis
@@ -69,14 +66,15 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	if filePath == "" {
 		err = disk.BaseCloudDisk.UploadSimpleFile(dst, userId, md5String, file.Size)
 		if err != nil {
-			return serializer.DBErr("can't upload to cloud", err)
+			loglog.Log().Error("[FileUploadService.UploadFile] Fail to upload file to Cloud: ", err)
+			return serializer.InternalErr("", err)
 		}
 		filePath = userId
 	}
 
 	// insert file to database
 	filename, extend := utils.SplitFilename(file.Filename)
-	fileModel := &model.File{
+	fileModel := model.File{
 		Owner:          userId,
 		FileName:       filename,
 		FilePostfix:    extend,
@@ -86,22 +84,30 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 		Size:           file.Size,
 	}
 
+	t := model.DB.Begin()
 	// insert user file info to database
-	if err := createFile(fileModel, &userStore); err != nil {
-		return serializer.DBErr("create file err when upload file", err)
+	if err := createFile(t, fileModel, userStore); err != nil {
+		loglog.Log().Error("[FileUploadService.UploadFile] Fail to create file info: ", err)
+		t.Rollback()
+		return serializer.DBErr("", err)
 	}
-
-	// save file info to database
-	fileModel.SaveFileUploadInfoToRedis()
 
 	// add deleted file size to filefolder and parent filefolder
 	var userFileFolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.FolderId).Find(&userFileFolder).Error; err != nil {
-		return serializer.DBErr("get filefolder err when upload file", err)
+	if err := t.Where("uuid = ?", service.FolderId).Find(&userFileFolder).Error; err != nil {
+		loglog.Log().Error("[FileUploadService.UploadFile] Fail to get filefolder info: ", err)
+		t.Rollback()
+		return serializer.DBErr("", err)
 	}
-	if err := userFileFolder.AddFileFolderSize(file.Size); err != nil {
-		return serializer.DBErr("sub filefolder size err when upload file %v", err)
+	if err := userFileFolder.AddFileFolderSize(t, file.Size); err != nil {
+		loglog.Log().Error("[FileUploadService.UploadFile] Fail to update filefolder volum: ", err)
+		t.Rollback()
+		return serializer.DBErr("", err)
 	}
 
-	return serializer.Success(serializer.BuildFile(*fileModel))
+	t.Commit()
+
+	// save file info to database
+	fileModel.SaveFileUploadInfoToRedis()
+	return serializer.Success(serializer.BuildFile(fileModel))
 }

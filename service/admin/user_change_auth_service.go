@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserChangeAuthService struct {
@@ -15,33 +16,35 @@ func (service *UserChangeAuthService) UserChangeAuth(userStatus string) serializ
 	// get user info from database
 	var user model.User
 	if err := model.DB.Where("uuid = ?", service.UserId).Find(&user).Error; err != nil {
-		return serializer.DBErr("get user info err when change user auth", err)
+		loglog.Log().Error("[UserChangeAuthService.UserChangeAuth] Fail to find user info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	if user.Uuid == "" {
-		return serializer.ParamsErr("can't get user when change user auth", nil)
+		return serializer.ParamsErr("", nil)
 	}
 
 	// check if user is an admin
 	if userStatus != model.StatusAdmin && userStatus != model.StatusSuperAdmin {
-		return serializer.NotAuthErr("common user can't change auth")
+		return serializer.NotAuthErr("")
 	}
 
 	// normal admin can't change admin auth
 	if userStatus == model.StatusAdmin {
 		if user.Status == model.StatusAdmin || user.Status == model.StatusSuperAdmin {
-			return serializer.NotAuthErr("admin not auth to change admin auth")
+			return serializer.NotAuthErr("")
 		}
 
 		if service.NewStatus == model.StatusAdmin || service.NewStatus == model.StatusSuperAdmin {
-			return serializer.NotAuthErr("admin not auth to change admin auth")
+			return serializer.NotAuthErr("")
 		}
 	}
 
 	// save user auth
 	user.Status = service.NewStatus
 	if err := model.DB.Save(&user).Error; err != nil {
-		return serializer.DBErr("save user info err when change user auth", err)
+		loglog.Log().Error("[UserChangeAuthService.UserChangeAuth] Fail to save user info: ", err)
+		return serializer.DBErr("", err)
 	}
 	return serializer.Success(serializer.BuildUser(user))
 }

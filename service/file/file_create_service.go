@@ -5,6 +5,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileCreateService struct {
@@ -15,6 +16,7 @@ type FileCreateService struct {
 	Size           int64  `json:"size" form:"size" binding:"required"`
 }
 
+// CreateFile used to create file by use uploadURL to upload file
 func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 	// check if the file was successfully uploaded to the cloud
 	uploadFileNameInCloud := utils.FastBuildFileName(service.FileUuid, service.FilePostfix)
@@ -23,13 +25,14 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 		return serializer.ErrorResponse(err)
 	}
 	if !successUpload {
-		return serializer.DBErr("upload faild", nil)
+		return serializer.DBErr("", nil)
 	}
 
 	// check filefolder auth
 	var fileFolder model.FileFolder
 	if err = model.DB.Find(&fileFolder).Where("uuid = ?", service.FileUuid).Error; err != nil {
-		return serializer.DBErr("can't find filefolder", err)
+		loglog.Log().Error("[FileCreateService.CreateFile] Fail to find filefolder: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	if fileFolder.OwnerID != owner {
@@ -48,7 +51,8 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 	}
 
 	if err = model.DB.Create(&file).Error; err != nil {
-		return serializer.DBErr("create file error", err)
+		loglog.Log().Error("[FileCreateService.CreateFile] Fail to create file: ", err)
+		return serializer.DBErr("", err)
 	}
 	return serializer.Success(nil)
 }

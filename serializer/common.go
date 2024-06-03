@@ -30,6 +30,8 @@ const (
 	CodeNotAuthError = http.StatusUnauthorized
 	// CodeDBError database error Code 500
 	CodeDBError = http.StatusInternalServerError
+	// InternalError error Code 500
+	CodeInternalError = http.StatusInternalServerError
 	// CodeError common error code 404
 	CodeError = http.StatusNotFound
 	// CodeParamsError params error Code 50001
@@ -40,16 +42,16 @@ const (
 func Success(data interface{}) Response {
 	return Response{
 		Code: CodeSuccess,
-		Msg:  "success",
+		Msg:  "Success",
 		Data: data,
 	}
 }
 
 // NotAuthErr use msg build a not auth err response, if msg is null
-// msg info is "not auth"
+// msg info is "NotAuth"
 func NotAuthErr(msg string) Response {
 	if msg == "" {
-		msg = "not auth"
+		msg = "NotAuth"
 	}
 	return Response{
 		Code: CodeNotAuthError,
@@ -60,7 +62,7 @@ func NotAuthErr(msg string) Response {
 // NotLogin return an unlogin response
 func NotLogin(msg string) Response {
 	if msg == "" {
-		msg = "Not Login"
+		msg = "NotLogin"
 	}
 	return Response{
 		Code: CodeNotLogin,
@@ -83,15 +85,23 @@ func Err(errCode int, msg string, err error) Response {
 // DBErr return a database error response
 func DBErr(msg string, err error) Response {
 	if msg == "" {
-		msg = "database error"
+		msg = "DBerr"
 	}
 	return Err(CodeDBError, msg, err)
+}
+
+// InternalErr return an Internal err response
+func InternalErr(msg string, err error) Response {
+	if msg == "" {
+		msg = "Internal"
+	}
+	return Err(CodeInternalError, msg, err)
 }
 
 // DBErr return a params error response
 func ParamsErr(msg string, err error) Response {
 	if msg == "" {
-		msg = "parmars error"
+		msg = "ParamErr"
 	}
 	return Err(CodeParamsError, msg, err)
 }
@@ -99,8 +109,8 @@ func ParamsErr(msg string, err error) Response {
 // ErrorResponse return err msg
 func ErrorResponse(err error) Response {
 	if _, ok := err.(*json.UnmarshalTypeError); ok {
-		return ParamsErr("JSON类型不匹配", err)
+		return ParamsErr("JsonNotMatched", err)
 	}
 
-	return ParamsErr("参数错误", err)
+	return ParamsErr("", err)
 }

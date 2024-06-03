@@ -3,6 +3,7 @@ package filefolder
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileFolderCreateService struct {
@@ -14,11 +15,13 @@ type FileFolderCreateService struct {
 func (service *FileFolderCreateService) CreateFileFolder(userId string) serializer.Response {
 	// check if user match
 	var fileFolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.ParentFolderID).Find(&fileFolder).Error; err != nil {
-		return serializer.DBErr("dberr", err)
+	var err error
+	if err = model.DB.Where("uuid = ?", service.ParentFolderID).Find(&fileFolder).Error; err != nil {
+		loglog.Log().Error("[FileFolderCreateService.CreateFileFolder] Fail to get filefolder info: ", err)
+		return serializer.DBErr("", err)
 	}
 	if fileFolder.OwnerID != userId {
-		return serializer.NotAuthErr("can't matched user when create filefolder")
+		return serializer.NotAuthErr("")
 	}
 
 	// insert filefolder to database
@@ -30,8 +33,9 @@ func (service *FileFolderCreateService) CreateFileFolder(userId string) serializ
 		Size:           0,
 	}
 
-	if err := model.DB.Create(&createFilerFolder).Error; err != nil {
-		return serializer.DBErr("create filefolder err when filefolercreate", err)
+	if err = model.DB.Create(&createFilerFolder).Error; err != nil {
+		loglog.Log().Error("[FileFolderCreateService.CreateFileFolder] Fail to create filefolder: ", err)
+		return serializer.DBErr("", err)
 	}
 	return serializer.Success(serializer.BuildFileFolder(createFilerFolder))
 }

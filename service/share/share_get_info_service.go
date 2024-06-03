@@ -25,7 +25,8 @@ func (service *ShareGetInfoService) GetShareInfo(shareid string) serializer.Resp
 
 	// can't get share info from redis search database
 	if err := model.DB.Where("uuid = ?", shareid).Find(&share).Error; err != nil {
-		return serializer.DBErr("get share err when get share info", err)
+		loglog.Log().Error("[ShareGetInfoService.GetShareInfo] Fail to get share info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// get downloadurl if can't get download url means share is deleted

@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserUpdateService struct {
@@ -14,12 +15,14 @@ func (service *UserUpdateService) UpdateUserInfo(userId string) serializer.Respo
 	// check if user match userid
 	var user model.User
 	if err := model.DB.Where("uuid = ?", userId).Find(&user).Error; err != nil {
-		return serializer.DBErr("can't find user when update user info", err)
+		loglog.Log().Error("[UserUpdateService.UpdateUserInfo] Fail to find user: ", err)
+		return serializer.DBErr("", err)
 	}
 	// update user to database
 	user.NickName = service.NickName
 	if err := model.DB.Save(&user).Error; err != nil {
-		return serializer.DBErr("can't save user when update user info", err)
+		loglog.Log().Error("[UserUpdateService.UpdateUserInfo] Fail to save user info: ", err)
+		return serializer.DBErr("", err)
 	}
 	return serializer.Success(serializer.BuildUser(user))
 }

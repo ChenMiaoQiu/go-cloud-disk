@@ -3,6 +3,7 @@ package filefolder
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileFolderUpdateService struct {
@@ -13,26 +14,23 @@ type FileFolderUpdateService struct {
 
 func (service *FileFolderUpdateService) UpdateFileFolderInfo(userid string) serializer.Response {
 	var filefolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.FileFolderId).Find(&filefolder).Error; err != nil {
-		return serializer.DBErr("find filefolder err when update filefolde info", err)
-	}
-
-	// check if user match filefolder owner
-	if userid != filefolder.OwnerID {
-		return serializer.NotAuthErr("can't match filefolder owner")
+	var err error
+	if err := model.DB.Where("uuid = ? and owner_id = ?", service.FileFolderId, userid).Find(&filefolder).Error; err != nil {
+		loglog.Log().Error("[FileFolderUpdateService.UpdateFileFolderInfo] Fail to find filefolder info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// check target filefoler owner
 	var targetFilefolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.NewParentId).Find(&targetFilefolder).Error; err != nil {
-		return serializer.DBErr("find target filefolder err when update filefolder info", err)
+	if err := model.DB.Where("uuid = ? and owner_id = ?", service.NewParentId, userid).Find(&targetFilefolder).Error; err != nil {
+		loglog.Log().Error("[FileFolderUpdateService.UpdateFileFolderInfo] Fail to find new parent filefolder info: ", err)
+		return serializer.DBErr("", err)
 	}
-	if userid != targetFilefolder.OwnerID {
-		return serializer.NotAuthErr("can't match filefolder owner")
-	}
+
 	var parentFilefolder model.FileFolder
 	if err := model.DB.Where("uuid = ?", filefolder.ParentFolderID).Find(&parentFilefolder).Error; err != nil {
-		return serializer.DBErr("find parent filefolder err when update filefolder info", err)
+		loglog.Log().Error("[FileFolderUpdateService.UpdateFileFolderInfo] Fail to find old parent filefolder info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// get new filefolder info
@@ -44,14 +42,32 @@ func (service *FileFolderUpdateService) UpdateFileFolderInfo(userid string) seri
 	filefolder.ParentFolderID = service.NewParentId
 
 	// update filefolder info to database
-	if err := model.DB.Save(&filefolder).Error; err != nil {
-		return serializer.DBErr("save filefolder info err when update filefolder info", err)
+	t := model.DB.Begin()
+	defer func() {
+		if err != nil {
+			t.Rollback()
+		} else {
+			t.Commit()
+		}
+	}()
+
+	if err := t.Save(&filefolder).Error; err != nil {
+		loglog.Log().Error("[FileFolderUpdateService.UpdateFileFolderInfo] Fail to update filefolder info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// change filefolder size
 	if targetFilefolder.Uuid != parentFilefolder.Uuid {
-		parentFilefolder.SubFileFolderSize(filefolder.Size)
-		targetFilefolder.AddFileFolderSize(filefolder.Size)
+		err = parentFilefolder.SubFileFolderSize(t, filefolder.Size)
+		if err != nil {
+			loglog.Log().Error("[FileFolderUpdateService.UpdateFileFolderInfo] Fail to update old filefolder info: ", err)
+			return serializer.DBErr("", err)
+		}
+		targetFilefolder.AddFileFolderSize(t, filefolder.Size)
+		if err != nil {
+			loglog.Log().Error("[FileFolderUpdateService.UpdateFileFolderInfo] Fail to update new filefolder info: ", err)
+			return serializer.DBErr("", err)
+		}
 	}
 
 	return serializer.Success(nil)

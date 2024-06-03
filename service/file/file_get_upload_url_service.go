@@ -3,6 +3,7 @@ package file
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"github.com/google/uuid"
 )
 
@@ -20,7 +21,8 @@ func (service *GetUploadURLService) GetUploadURL(fileowner string) serializer.Re
 	fileName := fileID + "." + service.FileType
 	url, err := disk.BaseCloudDisk.GetUploadPresignedURL(fileowner, "", fileName)
 	if err != nil {
-		return serializer.Err(serializer.CodeError, "get object error", err)
+		loglog.Log().Error("[GetUploadURLService.GetUploadURL] Fail to get upload url: ", err)
+		return serializer.InternalErr("", err)
 	}
 
 	return serializer.Success(getUploadURLResponse{

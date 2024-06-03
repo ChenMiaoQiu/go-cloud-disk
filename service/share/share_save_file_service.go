@@ -3,6 +3,7 @@ package share
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type ShareSaveFileService struct {
@@ -13,36 +14,48 @@ type ShareSaveFileService struct {
 func (service *ShareSaveFileService) ShareSaveFile(userId string) serializer.Response {
 	// get save file from database
 	var saveFile model.File
-	if err := model.DB.Where("uuid = ?", service.FileId).Find(&saveFile).Error; err != nil {
-		return serializer.DBErr("can't find file when share save file", err)
+	var err error
+	if err = model.DB.Where("uuid = ?", service.FileId).Find(&saveFile).Error; err != nil {
+		loglog.Log().Error("[ShareSaveFileService.ShareSaveFile] Fail to find file info: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// get save Filefolder from database and check owner
 	var targetFilefolder model.FileFolder
-	if err := model.DB.Where("uuid = ?", service.SaveFilefolder).Find(&targetFilefolder).Error; err != nil {
-		return serializer.DBErr("can't find filefolder when save file", err)
-	}
-	if targetFilefolder.OwnerID != userId {
-		return serializer.NotAuthErr("can't match user when share save file")
+	if err = model.DB.Where("uuid = ? and owner_id = ?", service.SaveFilefolder, userId).Find(&targetFilefolder).Error; err != nil {
+		loglog.Log().Error("[ShareSaveFileService.ShareSaveFile] Fail to find filefolder: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// get user filefolder from database
 	var targetFileStore model.FileStore
 	if err := model.DB.Where("uuid = ?", targetFilefolder.FileStoreID).Find(&targetFileStore).Error; err != nil {
-		return serializer.DBErr("can't find filestore when save file", err)
+		loglog.Log().Error("[ShareSaveFileService.ShareSaveFile] Fail to find filestore: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// check if current size exceed when add file size
 	if targetFileStore.CurrentSize+saveFile.Size > targetFileStore.MaxSize {
-		return serializer.NotAuthErr("file size beyond filestore max size")
+		return serializer.ParamsErr("ExceedStoreLimit", nil)
 	}
 	// change filefolder size
 	targetFileStore.AddCurrentSize(saveFile.Size)
-	if err := model.DB.Save(&targetFileStore).Error; err != nil {
-		return serializer.DBErr("updata userstore size err when save file", err)
+	t := model.DB.Begin()
+	defer func() {
+		if err != nil {
+			t.Rollback()
+		} else {
+			t.Commit()
+		}
+	}()
+
+	if err := t.Save(&targetFileStore).Error; err != nil {
+		loglog.Log().Error("[ShareSaveFileService.ShareSaveFile] Fail to updata userstore: ", err)
+		return serializer.DBErr("", err)
 	}
-	if err := targetFilefolder.AddFileFolderSize(saveFile.Size); err != nil {
-		return serializer.DBErr("add filefolder size err when save file", err)
+	if err := targetFilefolder.AddFileFolderSize(t, saveFile.Size); err != nil {
+		loglog.Log().Error("[ShareSaveFileService.ShareSaveFile] Fail to add filefolder size: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	// save file to filefolder
@@ -56,7 +69,8 @@ func (service *ShareSaveFileService) ShareSaveFile(userId string) serializer.Res
 		ParentFolderId: service.SaveFilefolder,
 	}
 	if err := model.DB.Create(&newFile).Error; err != nil {
-		return serializer.DBErr("create file err when save file", err)
+		loglog.Log().Error("[ShareSaveFileService.ShareSaveFile] Fail to create file: ", err)
+		return serializer.DBErr("", err)
 	}
 
 	return serializer.Success(nil)

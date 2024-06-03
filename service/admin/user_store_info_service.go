@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileStoreGetInfoService struct {
@@ -10,14 +11,11 @@ type FileStoreGetInfoService struct {
 
 // FileStoreGetInfo get user store info by userid
 func (service *FileStoreGetInfoService) FileStoreGetInfo(userId string) serializer.Response {
-	var user model.User
-	if err := model.DB.Where("uuid = ?", userId).Find(&user).Error; err != nil {
-		return serializer.DBErr("get user err when admin get filestore info", err)
-	}
 	// get store from database
 	var store model.FileStore
-	if err := model.DB.Where("uuid = ?", user.UserFileStoreID).Find(&store).Error; err != nil {
-		return serializer.DBErr("get filestore err admin when get filestore info", err)
+	if err := model.DB.Where("onwer_id = ?", userId).First(&store).Error; err != nil {
+		loglog.Log().Error("[FileStoreGetInfoService.FileStoreGetInfo] Fail to get user filestore info: ", err)
+		return serializer.DBErr("", err)
 	}
 	return serializer.Success(serializer.BuildFileStore(store))
 }
