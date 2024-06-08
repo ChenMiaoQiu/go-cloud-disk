@@ -28,12 +28,12 @@ func checkIfFileSizeExceedsVolum(userStore *model.FileStore, userId string, size
 func createFile(t *gorm.DB, file model.File, userStore model.FileStore) error {
 	// save file info to database
 	var err error
-	if err = t.Save(file).Error; err != nil {
+	if err = t.Save(&file).Error; err != nil {
 		return err
 	}
 	// add user file store volum
 	userStore.AddCurrentSize(file.Size)
-	if err = t.Save(userStore).Error; err != nil {
+	if err = t.Save(&userStore).Error; err != nil {
 		return err
 	}
 	return nil
