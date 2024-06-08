@@ -35,9 +35,30 @@ func (service *DeleteFileFolderService) DeleteFileFolder(userId string, fileFold
 		}
 	}()
 
-	if err := t.Delete(&fileFolder).Error; err != nil {
-		loglog.Log().Error("[DeleteFileFolderService.DeleteFileFolder] Fail to find filefolder info: ", err)
-		return serializer.DBErr("delete filefolder err when delete filefolder func", err)
+	// delete filefolder and file that in DeleteFileFolder
+	deleteFileFolderIDs := []string{}
+	deleteFileFolderIDs = append(deleteFileFolderIDs, fileFolderId)
+	for len(deleteFileFolderIDs) > 0 {
+		deleteFileFolders := []model.FileFolder{}
+		deleteIDs := []string{}
+		// get filefolder that in deleteFileFolder
+		if err := t.Select("uuid").Where("parent_folder_id in (?)", deleteFileFolderIDs).Find(&deleteFileFolders).Error; err != nil {
+			loglog.Log().Error("[DeleteFileFolderService.DeleteFileFolder] Fail to find delete filefolders info: ", err)
+			return serializer.DBErr("", err)
+		}
+		// get will delete filefolder id
+		for _, filefolder := range deleteFileFolders {
+			deleteIDs = append(deleteIDs, filefolder.Uuid)
+		}
+		if err := t.Where("uuid in (?)", deleteFileFolderIDs).Delete(&model.FileFolder{}).Error; err != nil {
+			loglog.Log().Error("[DeleteFileFolderService.DeleteFileFolder] Fail to delete filefolder: ", err)
+			return serializer.DBErr("", err)
+		}
+		if err := t.Where("parent_folder_id in (?)", deleteFileFolderIDs).Delete(&model.FileFolder{}).Error; err != nil {
+			loglog.Log().Error("[DeleteFileFolderService.DeleteFileFolder] Fail to delete file: ", err)
+			return serializer.DBErr("", err)
+		}
+		deleteFileFolderIDs = deleteIDs
 	}
 
 	// delete filefolder size from parent filefolder
