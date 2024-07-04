@@ -6,7 +6,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type ShareCreateService struct {
@@ -22,7 +22,7 @@ func (service *ShareCreateService) CreateShare(userId string) serializer.Respons
 	// check file owner
 	var shareFile model.File
 	if err := model.DB.Where("uuid = ? and owner = ?", service.FileId, userId).Find(&shareFile).Error; err != nil {
-		loglog.Log().Error("[ShareCreateService.CreateShare] Fail to find file info: ", err)
+		logger.Log().Error("[ShareCreateService.CreateShare] Fail to find file info: ", err)
 		return serializer.DBErr("", err)
 	}
 
@@ -36,7 +36,7 @@ func (service *ShareCreateService) CreateShare(userId string) serializer.Respons
 		SharingTime: time.Unix(time.Now().Unix(), 0).Format(utils.DefaultTimeTemplate),
 	}
 	if err := model.DB.Create(&newShare).Error; err != nil {
-		loglog.Log().Error("[ShareCreateService.CreateShare] Fail to create share: ", err)
+		logger.Log().Error("[ShareCreateService.CreateShare] Fail to create share: ", err)
 		return serializer.DBErr("", err)
 	}
 

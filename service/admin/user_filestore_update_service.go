@@ -3,7 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserFilestoreUpdateService struct {
@@ -15,7 +15,7 @@ func (service *UserFilestoreUpdateService) UserFilestoreUpdate() serializer.Resp
 	// search filestore from database
 	var userFilestore model.FileStore
 	if err := model.DB.Where("owner_id = ?", service.UserId).First(&userFilestore).Error; err != nil {
-		loglog.Log().Error("[UserFilestoreUpdateService.UserFilestoreUpdate] Fail to find filestore info: ", err)
+		logger.Log().Error("[UserFilestoreUpdateService.UserFilestoreUpdate] Fail to find filestore info: ", err)
 		return serializer.DBErr("", err)
 	}
 
@@ -24,7 +24,7 @@ func (service *UserFilestoreUpdateService) UserFilestoreUpdate() serializer.Resp
 	userFilestore.MaxSize = max(0, userFilestore.MaxSize)
 
 	if err := model.DB.Save(&userFilestore).Error; err != nil {
-		loglog.Log().Error("[UserFilestoreUpdateService.UserFilestoreUpdate] Fail to update filestore info: ", err)
+		logger.Log().Error("[UserFilestoreUpdateService.UserFilestoreUpdate] Fail to update filestore info: ", err)
 		return serializer.DBErr("", err)
 	}
 

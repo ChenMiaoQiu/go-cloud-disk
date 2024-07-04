@@ -7,7 +7,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type GetDailyRankService struct {
@@ -19,14 +19,14 @@ func (service *GetDailyRankService) GetDailyRank() serializer.Response {
 	// get share rank in cache
 	shareRank, err := cache.RedisClient.ZRevRange(context.Background(), cache.DailyRankKey, 0, 9).Result()
 	if err != nil {
-		loglog.Log().Error("[GetDailyRankService.GetDailyRank] Fail to get rank form cache: ", err)
+		logger.Log().Error("[GetDailyRankService.GetDailyRank] Fail to get rank form cache: ", err)
 		return serializer.DBErr("", err)
 	}
 
 	if len(shareRank) > 0 {
 		err := model.DB.Model(&model.Share{}).Where("uuid in (?)", shareRank).Find(&shares).Error
 		if err != nil {
-			loglog.Log().Error("[GetDailyRankService.GetDailyRank] Fail to get rank form database: ", err)
+			logger.Log().Error("[GetDailyRankService.GetDailyRank] Fail to get rank form database: ", err)
 			return serializer.DBErr("", err)
 		}
 	}

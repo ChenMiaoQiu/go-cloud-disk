@@ -3,7 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileDeleteService struct {
@@ -15,14 +15,14 @@ func (service *FileDeleteService) FileDelete(operStatus string, fileId string) s
 	var err error
 	var deleteFile model.File
 	if err = model.DB.Where("uuid = ?", fileId).Find(&deleteFile).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail find delete file info: ", err)
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail find delete file info: ", err)
 		return serializer.DBErr("", err)
 	}
 
 	// get file owner
 	var fileOwner model.User
 	if err = model.DB.Where("uuid = ?", deleteFile.Owner).Find(&fileOwner).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail find delete file onwer: ", err)
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail find delete file onwer: ", err)
 		return serializer.DBErr("", err)
 	}
 
@@ -36,12 +36,12 @@ func (service *FileDeleteService) FileDelete(operStatus string, fileId string) s
 	// delete all file
 	var files []model.File
 	if err = model.DB.Where("file_uuid = ?", deleteFile.FileUuid).Find(&files).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail find delete files: ", err)
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail find delete files: ", err)
 		return serializer.DBErr("", err)
 	}
 
 	if err = model.DB.Delete(&files).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail to delete files: ", err)
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail to delete files: ", err)
 		return serializer.DBErr("", err)
 	}
 

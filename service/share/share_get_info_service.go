@@ -3,7 +3,7 @@ package share
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type ShareGetInfoService struct {
@@ -25,7 +25,7 @@ func (service *ShareGetInfoService) GetShareInfo(shareid string) serializer.Resp
 
 	// can't get share info from redis search database
 	if err := model.DB.Where("uuid = ?", shareid).Find(&share).Error; err != nil {
-		loglog.Log().Error("[ShareGetInfoService.GetShareInfo] Fail to get share info: ", err)
+		logger.Log().Error("[ShareGetInfoService.GetShareInfo] Fail to get share info: ", err)
 		return serializer.DBErr("", err)
 	}
 
@@ -41,7 +41,7 @@ func (service *ShareGetInfoService) GetShareInfo(shareid string) serializer.Resp
 		// if is empty share remove it from daily rank
 		err := share.SaveShareInfoToRedis(downloadUrl)
 		if err != nil {
-			loglog.Log().Error(err.Error())
+			logger.Log().Error(err.Error())
 		}
 	}
 

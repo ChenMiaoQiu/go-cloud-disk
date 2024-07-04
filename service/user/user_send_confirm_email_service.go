@@ -10,7 +10,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserSendConfirmEmailService struct {
@@ -39,7 +39,7 @@ func (service *UserSendConfirmEmailService) SendConfirmEmail() serializer.Respon
 	// check if email has register
 	var emailNum int64
 	if err := model.DB.Model(&model.User{}).Where("user_name = ?", service.UserEmail).Count(&emailNum).Error; err != nil {
-		loglog.Log().Error("[UserSendConfirmEmailService.SendConfirmEmail] Fail to find user: ", err)
+		logger.Log().Error("[UserSendConfirmEmailService.SendConfirmEmail] Fail to find user: ", err)
 		return serializer.DBErr("", err)
 	}
 	if emailNum > 0 {
@@ -50,7 +50,7 @@ func (service *UserSendConfirmEmailService) SendConfirmEmail() serializer.Respon
 	cache.RedisClient.Set(context.Background(), cache.EmailCodeKey(service.UserEmail), code, time.Minute*30)
 
 	if err := utils.SendConfirmMessage(service.UserEmail, code); err != nil {
-		loglog.Log().Error("[UserSendConfirmEmailService.SendConfirmEmail] Fail to send email: ", err)
+		logger.Log().Error("[UserSendConfirmEmailService.SendConfirmEmail] Fail to send email: ", err)
 		return serializer.InternalErr("", err)
 	}
 	// limit 1 email max request 1 confirm email in 3 minute

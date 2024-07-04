@@ -3,7 +3,7 @@ package filefolder
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileFolderGetAllFileFolderService struct {
@@ -13,7 +13,7 @@ type FileFolderGetAllFileFolderService struct {
 func (service *FileFolderGetAllFileFolderService) GetAllFileFolder(userId string, fileFolderID string) serializer.Response {
 	var filefolder []model.FileFolder
 	if err := model.DB.Where("parent_folder_id = ? and owner_id = ?", fileFolderID, userId).Find(&filefolder).Error; err != nil {
-		loglog.Log().Error("[FileFolderGetAllFileFolderService.GetAllFileFolder] Fail to find filefolder: ", err)
+		logger.Log().Error("[FileFolderGetAllFileFolderService.GetAllFileFolder] Fail to find filefolder: ", err)
 		return serializer.DBErr("", err)
 	}
 	return serializer.Success(serializer.BuildFileFolders(filefolder))

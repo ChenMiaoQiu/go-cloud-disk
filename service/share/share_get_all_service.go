@@ -3,7 +3,7 @@ package share
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type ShareGetAllService struct {
@@ -14,7 +14,7 @@ func (service *ShareGetAllService) GetAllShare(userId string) serializer.Respons
 	// get shares from database
 	var shares []model.Share
 	if err := model.DB.Where("owner = ?", userId).Find(&shares).Error; err != nil {
-		loglog.Log().Error("[ShareGetAllService.GetAllShare] Fail to get share info: ", err)
+		logger.Log().Error("[ShareGetAllService.GetAllShare] Fail to get share info: ", err)
 		return serializer.DBErr("", err)
 	}
 

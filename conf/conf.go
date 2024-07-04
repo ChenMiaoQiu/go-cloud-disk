@@ -8,7 +8,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/task"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +19,7 @@ func Init() {
 	disk.SetBaseCloudDisk(os.Getenv("CLOUD_DISK_VERSION"))
 
 	// set log
-	loglog.BuildLogger(os.Getenv("LOG_LEVEL"))
+	logger.BuildLogger(os.Getenv("LOG_LEVEL"))
 
 	// connect database
 	model.Database(os.Getenv("MYSQL_DSN"))

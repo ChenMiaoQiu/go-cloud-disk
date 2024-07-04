@@ -3,7 +3,7 @@ package admin
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserChangeAuthService struct {
@@ -16,7 +16,7 @@ func (service *UserChangeAuthService) UserChangeAuth(userStatus string) serializ
 	// get user info from database
 	var user model.User
 	if err := model.DB.Where("uuid = ?", service.UserId).Find(&user).Error; err != nil {
-		loglog.Log().Error("[UserChangeAuthService.UserChangeAuth] Fail to find user info: ", err)
+		logger.Log().Error("[UserChangeAuthService.UserChangeAuth] Fail to find user info: ", err)
 		return serializer.DBErr("", err)
 	}
 
@@ -43,7 +43,7 @@ func (service *UserChangeAuthService) UserChangeAuth(userStatus string) serializ
 	// save user auth
 	user.Status = service.NewStatus
 	if err := model.DB.Save(&user).Error; err != nil {
-		loglog.Log().Error("[UserChangeAuthService.UserChangeAuth] Fail to save user info: ", err)
+		logger.Log().Error("[UserChangeAuthService.UserChangeAuth] Fail to save user info: ", err)
 		return serializer.DBErr("", err)
 	}
 	return serializer.Success(serializer.BuildUser(user))

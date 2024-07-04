@@ -5,7 +5,7 @@ import (
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"gorm.io/gorm"
 )
 
@@ -46,25 +46,25 @@ func (service *FileDeleteService) FileDelete(userId string, fileid string) seria
 
 	// check file owner
 	if err = t.Where("uuid = ?", fileid).Find(&userFile).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail to find user file")
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail to find user file")
 		return serializer.DBErr("", err)
 	}
 	if userFile.Owner != userId {
 		return serializer.NotAuthErr("")
 	}
 	if err = t.Where("owner_id = ?", userId).First(&userStore).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail to find user filestore")
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail to find user filestore")
 		return serializer.DBErr("", err)
 	}
 	var userFileFolder model.FileFolder
 	if err = t.Where("uuid = ?", userFile.ParentFolderId).Find(&userFileFolder).Error; err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail to find user filefolder")
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail to find user filefolder")
 		return serializer.DBErr("", err)
 	}
 
 	// use transaction to delete file
 	if err = deleteFile(t, userFile, userStore, userFileFolder); err != nil {
-		loglog.Log().Error("[FileDeleteService.FileDelete] Fail to update user filestore volum: ", err)
+		logger.Log().Error("[FileDeleteService.FileDelete] Fail to update user filestore volum: ", err)
 		return serializer.DBErr("", err)
 	}
 

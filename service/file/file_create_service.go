@@ -5,7 +5,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type FileCreateService struct {
@@ -31,7 +31,7 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 	// check filefolder auth
 	var fileFolder model.FileFolder
 	if err = model.DB.Find(&fileFolder).Where("uuid = ?", service.FileUuid).Error; err != nil {
-		loglog.Log().Error("[FileCreateService.CreateFile] Fail to find filefolder: ", err)
+		logger.Log().Error("[FileCreateService.CreateFile] Fail to find filefolder: ", err)
 		return serializer.DBErr("", err)
 	}
 
@@ -51,7 +51,7 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 	}
 
 	if err = model.DB.Create(&file).Error; err != nil {
-		loglog.Log().Error("[FileCreateService.CreateFile] Fail to create file: ", err)
+		logger.Log().Error("[FileCreateService.CreateFile] Fail to create file: ", err)
 		return serializer.DBErr("", err)
 	}
 	return serializer.Success(nil)

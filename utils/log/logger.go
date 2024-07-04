@@ -1,4 +1,4 @@
-package loglog
+package logger
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ const (
 	LevelDebug
 )
 
-// logger Log log
+// logger logger
 type Logger struct {
 	level int
 }

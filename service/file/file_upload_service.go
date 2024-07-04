@@ -7,7 +7,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"gorm.io/gorm"
 )
 
@@ -47,7 +47,7 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	// check if the currentSize exceeds maxsize after adding the file size
 	var isExceed bool
 	if isExceed, err = checkIfFileSizeExceedsVolum(&userStore, userId, file.Size); err != nil {
-		loglog.Log().Error("[FileUploadService.UploadFile] Fail to check user volum: ", err)
+		logger.Log().Error("[FileUploadService.UploadFile] Fail to check user volum: ", err)
 		return serializer.DBErr("", err)
 	}
 	if isExceed {
@@ -57,7 +57,7 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	// upload file to cloud
 	md5String, err := utils.GetFileMD5(dst)
 	if err != nil {
-		loglog.Log().Error("[FileUploadService.UploadFile] Fail to get file md5 Code: ", err)
+		logger.Log().Error("[FileUploadService.UploadFile] Fail to get file md5 Code: ", err)
 		return serializer.ParamsErr("", err)
 	}
 	// if the file has been recently uploaded, do not upload it to
@@ -66,7 +66,7 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	if filePath == "" {
 		err = disk.BaseCloudDisk.UploadSimpleFile(dst, userId, md5String, file.Size)
 		if err != nil {
-			loglog.Log().Error("[FileUploadService.UploadFile] Fail to upload file to Cloud: ", err)
+			logger.Log().Error("[FileUploadService.UploadFile] Fail to upload file to Cloud: ", err)
 			return serializer.InternalErr("", err)
 		}
 		filePath = userId
@@ -87,7 +87,7 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	t := model.DB.Begin()
 	// insert user file info to database
 	if err := createFile(t, fileModel, userStore); err != nil {
-		loglog.Log().Error("[FileUploadService.UploadFile] Fail to create file info: ", err)
+		logger.Log().Error("[FileUploadService.UploadFile] Fail to create file info: ", err)
 		t.Rollback()
 		return serializer.DBErr("", err)
 	}
@@ -95,12 +95,12 @@ func (service *FileUploadService) UploadFile(userId string, file *multipart.File
 	// add deleted file size to filefolder and parent filefolder
 	var userFileFolder model.FileFolder
 	if err := t.Where("uuid = ?", service.FolderId).Find(&userFileFolder).Error; err != nil {
-		loglog.Log().Error("[FileUploadService.UploadFile] Fail to get filefolder info: ", err)
+		logger.Log().Error("[FileUploadService.UploadFile] Fail to get filefolder info: ", err)
 		t.Rollback()
 		return serializer.DBErr("", err)
 	}
 	if err := userFileFolder.AddFileFolderSize(t, file.Size); err != nil {
-		loglog.Log().Error("[FileUploadService.UploadFile] Fail to update filefolder volum: ", err)
+		logger.Log().Error("[FileUploadService.UploadFile] Fail to update filefolder volum: ", err)
 		t.Rollback()
 		return serializer.DBErr("", err)
 	}

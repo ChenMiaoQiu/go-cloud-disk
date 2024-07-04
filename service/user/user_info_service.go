@@ -3,7 +3,7 @@ package user
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 )
 
 type UserInfoService struct {
@@ -15,7 +15,7 @@ func (service *UserInfoService) GetUserInfo(userid string) serializer.Response {
 
 	err := model.DB.Model(&model.User{}).Where("uuid = ?", userid).First(&user).Error
 	if err != nil {
-		loglog.Log().Error("[UserInfoService.GetUserInfo] Fail to find user")
+		logger.Log().Error("[UserInfoService.GetUserInfo] Fail to find user")
 		return serializer.ParamsErr("NotFound", err)
 	}
 

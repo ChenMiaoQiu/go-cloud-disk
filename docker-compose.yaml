@@ -1,0 +1,33 @@
+services:
+  mysql:
+    container_name: go-cloud-disk-mysql
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_DATABASE=godisk
+      - MYSQL_USER=godisk
+      - MYSQL_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=123456
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  redis:
+    container_name: go-cloud-disk-redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=123456
+      - ALLOW_EMPTY_PASSWORD=no
+    restart: always
+  rabbitMQ:
+    container_name: go-cloud-disk-rabbitMQ
+    image: rabbitmq:3.13-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123456
+    restart: always
