@@ -1,4 +1,4 @@
-package rabbitmq
+package rabbitMQ
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 )
 
 var RabbitMq *amqp.Connection
+
+var RabbitMqSendEmailQueue = "send-email-queue"
 
 func InitRabbitMq() {
 	connString := strings.Join([]string{conf.RabbitMQ, "://", conf.RabbitMQUser, ":", conf.RabbitMQPassword, "@", conf.RabbitMQHost, ":", conf.RabbitMQPort, "/"}, "")

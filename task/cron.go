@@ -3,7 +3,7 @@ package task
 import (
 	"time"
 
-	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 	"github.com/robfig/cron/v3"
 )
 

@@ -14,10 +14,11 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
-	rabbitmq "github.com/ChenMiaoQiu/go-cloud-disk/rabbitMQ"
+	"github.com/ChenMiaoQiu/go-cloud-disk/rabbitMQ"
+	"github.com/ChenMiaoQiu/go-cloud-disk/rabbitMQ/script"
 	"github.com/ChenMiaoQiu/go-cloud-disk/server"
 	"github.com/ChenMiaoQiu/go-cloud-disk/task"
-	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,13 +43,19 @@ func initServer() {
 	auth.InitCasbin()
 
 	// start rabbitmq
-	rabbitmq.InitRabbitMq()
+	rabbitMQ.InitRabbitMq()
+}
+
+func loadingScript() {
+	ctx := context.Background()
+	go script.SendConfirmEmailSync(ctx)
 }
 
 func main() {
 	// conf init
 	conf.Init()
 	initServer()
+	loadingScript()
 
 	// set router
 	gin.SetMode(conf.GinMode)
@@ -56,7 +63,7 @@ func main() {
 
 	// gin gracefully shuts down the server
 	srv := &http.Server{
-		Addr:    ":" + conf.ServerProt,
+		Addr:    ":" + conf.ServerPort,
 		Handler: r,
 	}
 

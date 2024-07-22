@@ -4,7 +4,7 @@ import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/disk"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 )
 
 type FileGetDownloadURLService struct {

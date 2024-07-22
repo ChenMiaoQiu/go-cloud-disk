@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
-	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"

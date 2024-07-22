@@ -8,7 +8,7 @@ import (
 
 var (
 	GinMode          string
-	ServerProt       string
+	ServerPort       string
 	JwtKey           string
 	AdminUserName    string
 	AdminPassword    string
@@ -40,7 +40,7 @@ func Init() {
 
 func initEnv() {
 	GinMode = os.Getenv("GIN_MODE")
-	ServerProt = os.Getenv("SERVER_PROT")
+	ServerPort = os.Getenv("SERVER_PORT")
 	JwtKey = os.Getenv("JWT_KEY")
 	AdminUserName = os.Getenv("ADMIN_USER_NAME")
 	AdminPassword = os.Getenv("ADMIN_PASSWORD")

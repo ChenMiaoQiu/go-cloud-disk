@@ -3,7 +3,7 @@ package filefolder
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 )
 
 type FileFolderUpdateService struct {

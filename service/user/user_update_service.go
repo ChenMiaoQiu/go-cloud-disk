@@ -3,7 +3,7 @@ package user
 import (
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
-	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 )
 
 type UserUpdateService struct {

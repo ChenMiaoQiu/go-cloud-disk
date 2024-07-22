@@ -2,15 +2,18 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"math/rand"
 	"strconv"
 	"time"
 
 	"github.com/ChenMiaoQiu/go-cloud-disk/cache"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
+	"github.com/ChenMiaoQiu/go-cloud-disk/rabbitMQ"
+	"github.com/ChenMiaoQiu/go-cloud-disk/rabbitMQ/task"
 	"github.com/ChenMiaoQiu/go-cloud-disk/serializer"
 	"github.com/ChenMiaoQiu/go-cloud-disk/utils"
-	logger "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
+	"github.com/ChenMiaoQiu/go-cloud-disk/utils/logger"
 )
 
 type UserSendConfirmEmailService struct {
@@ -49,12 +52,33 @@ func (service *UserSendConfirmEmailService) SendConfirmEmail() serializer.Respon
 	code := getConfirmCode()
 	cache.RedisClient.Set(context.Background(), cache.EmailCodeKey(service.UserEmail), code, time.Minute*30)
 
-	if err := utils.SendConfirmMessage(service.UserEmail, code); err != nil {
-		logger.Log().Error("[UserSendConfirmEmailService.SendConfirmEmail] Fail to send email: ", err)
+	if err := service.sendConfirmEmailToMQ(service.UserEmail, code); err != nil {
 		return serializer.InternalErr("", err)
 	}
 	// limit 1 email max request 1 confirm email in 3 minute
 	cache.RedisClient.Set(context.Background(), cache.RecentSendUserKey(service.UserEmail), code, time.Minute*3)
 
 	return serializer.Success(nil)
+}
+
+func (service *UserSendConfirmEmailService) sendConfirmEmailToMQ(targetEmail string, code string) error {
+	// limit 1 second
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
+	defer cancel()
+	sendConfirmEmailReq := task.SendConfirmEmailRequest{
+		Email: targetEmail,
+		Code:  code,
+	}
+
+	body, err := json.Marshal(sendConfirmEmailReq)
+	if err != nil {
+		logger.Log().Error("[UserSendConfirmEmailService.SendConfirmEmailToMQ] Fail to marshal request: ", err)
+		return err
+	}
+	err = rabbitMQ.SendMessageToMQ(ctx, rabbitMQ.RabbitMqSendEmailQueue, body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
