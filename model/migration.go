@@ -1,7 +1,7 @@
 package model
 
 import (
-	"os"
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 )
 
 // migration database
@@ -17,7 +17,7 @@ func migration() {
 func initSuperAdmin() {
 	// create super admin
 	var count int64
-	adminUserName := os.Getenv("ADMIN_USERNAME")
+	adminUserName := conf.AdminUserName
 	if err := DB.Model(&User{}).Where("user_name = ?", adminUserName).Count(&count).Error; err != nil {
 		panic("create super admin err %v")
 	}

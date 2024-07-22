@@ -2,8 +2,8 @@ package model
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -73,12 +73,12 @@ func (user *User) CreateUser() error {
 
 func createSuperAdmin() error {
 	admin := User{
-		UserName: os.Getenv("ADMIN_USERNAME"),
-		NickName: os.Getenv("ADMIN_USERNAME"),
+		UserName: conf.AdminUserName,
+		NickName: conf.AdminUserName,
 		Status:   StatusSuperAdmin,
 	}
 
-	if err := admin.SetPassword(os.Getenv("ADMIN_PASSWORD")); err != nil {
+	if err := admin.SetPassword(conf.AdminPassword); err != nil {
 		return fmt.Errorf("set password err when set superadmin %v", err)
 	}
 	if err := admin.CreateUser(); err != nil {

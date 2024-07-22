@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 	loglog "github.com/ChenMiaoQiu/go-cloud-disk/utils/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,7 +15,8 @@ import (
 var DB *gorm.DB
 
 // Database init mysql connect
-func Database(connString string) {
+func Database() {
+	connString := conf.MysqlDSN
 	// init gorm log set
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer

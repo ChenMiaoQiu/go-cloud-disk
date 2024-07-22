@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/smtp"
-	"os"
 	"regexp"
 	"time"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 	"github.com/jordan-wright/email"
 )
 
@@ -22,7 +22,7 @@ func VerifyEmailFormat(email string) bool {
 func sendMessage(ctx context.Context, em *email.Email) {
 	c, cancel := context.WithTimeout(ctx, time.Millisecond*900)
 	go func() {
-		em.Send(os.Getenv("EMAIL_SMTP_SERVER")+":25", smtp.PlainAuth("", os.Getenv("EMAIL_ADDR"), os.Getenv("EMAIL_SECRET_KEY"), os.Getenv("EMAIL_SMTP_SERVER")))
+		em.Send(conf.EmailSMTPServer+":25", smtp.PlainAuth("", conf.EmailAddr, conf.EmailSecretKey, conf.EmailSMTPServer))
 		defer cancel()
 	}()
 
@@ -39,7 +39,7 @@ func sendMessage(ctx context.Context, em *email.Email) {
 // or connect send email web err
 func SendConfirmMessage(targetMailBox string, code string) error {
 	em := email.NewEmail()
-	em.From = fmt.Sprintf("Go-Cloud-Disk <%s>", os.Getenv("EMAIL_ADDR"))
+	em.From = fmt.Sprintf("Go-Cloud-Disk <%s>", conf.EmailAddr)
 	em.To = []string{targetMailBox}
 
 	// email title

@@ -2,9 +2,9 @@ package utils
 
 import (
 	"errors"
-	"os"
 	"time"
 
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 	"github.com/ChenMiaoQiu/go-cloud-disk/model"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -18,7 +18,7 @@ type MyClaims struct {
 
 // GenToken generate jwt token
 func GenToken(issuer string, expireHour int, user *model.User) (string, error) {
-	mySigningKey := []byte(os.Getenv("JWT_KEY"))
+	mySigningKey := []byte(conf.JwtKey)
 	claims := MyClaims{
 		UserId:   user.Uuid,
 		UserName: user.UserName,
@@ -35,7 +35,7 @@ func GenToken(issuer string, expireHour int, user *model.User) (string, error) {
 
 // ParseToken parse jwt token
 func ParseToken(tokenString string) (*MyClaims, error) {
-	mySigningKey := []byte(os.Getenv("JWT_KEY"))
+	mySigningKey := []byte(conf.JwtKey)
 	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return mySigningKey, nil
 	})

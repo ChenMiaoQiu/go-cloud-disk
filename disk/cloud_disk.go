@@ -1,5 +1,7 @@
 package disk
 
+import "github.com/ChenMiaoQiu/go-cloud-disk/conf"
+
 type CloudDisk interface {
 	// GetUploadPresignedURL generate presigned URL.
 	// user can use presigned url to upload file by put method
@@ -32,7 +34,8 @@ func init() {
 	NewCloudDiskMap["TENCENT"] = NewTencentCloudDisk
 }
 
-func SetBaseCloudDisk(version string) {
+func SetBaseCloudDisk() {
+	version := conf.CloudDiskVersion
 	ver, ok := NewCloudDiskMap[version]
 	if !ok {
 		panic("unaccept this cloud disk version")

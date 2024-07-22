@@ -1,8 +1,7 @@
 package auth
 
 import (
-	"os"
-
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
@@ -11,7 +10,7 @@ import (
 var Casbin *casbin.Enforcer
 
 func InitCasbin() {
-	a, err := gormadapter.NewAdapter("mysql", os.Getenv("MYSQL_DSN"), true)
+	a, err := gormadapter.NewAdapter("mysql", conf.MysqlDSN, true)
 	if err != nil {
 		panic(err)
 	}

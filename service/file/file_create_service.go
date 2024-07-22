@@ -30,7 +30,7 @@ func (service *FileCreateService) CreateFile(owner string) serializer.Response {
 
 	// check filefolder auth
 	var fileFolder model.FileFolder
-	if err = model.DB.Find(&fileFolder).Where("uuid = ?", service.FileUuid).Error; err != nil {
+	if err = model.DB.Where("uuid = ?", service.FileUuid).Find(&fileFolder).Error; err != nil {
 		logger.Log().Error("[FileCreateService.CreateFile] Fail to find filefolder: ", err)
 		return serializer.DBErr("", err)
 	}

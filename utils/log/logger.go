@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/ChenMiaoQiu/go-cloud-disk/conf"
 )
 
 const (
@@ -72,7 +74,8 @@ func (ll *Logger) Debug(format string, v ...interface{}) {
 }
 
 // BuildLogger build loger by level
-func BuildLogger(level string) {
+func BuildLogger() {
+	level := conf.LogLevel
 	intLevel := LevelError
 	switch level {
 	case "error":
